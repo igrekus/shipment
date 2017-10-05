@@ -18,7 +18,10 @@ class PersistenceFacade(QObject):
         print("init persistence facade:", self._engine._engineType)
 
     def getContractList(self):
-        return {r[0]: ContractItem.fromSqlTuple(r) for r in self._engine.fetchContractList()}
+        return {r[0]: ContractItem.fromSqlTuple(r) for r in self._engine.fetchMainData()}
+
+    def getDict(self, name):
+        return {r[0]: r[1] for r in self._engine.fetchDict(name)}
 
     # def getSubstMap(self):
     #     substmap = defaultdict(set)

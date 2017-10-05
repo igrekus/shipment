@@ -6,7 +6,7 @@ from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
 
 class DomainModel(QObject):
 
-    dict_list = ["vendor"]
+    dict_list = ["client"]
 
     contractAdded = pyqtSignal(int)
     contractUpdated = pyqtSignal(int)
@@ -23,16 +23,12 @@ class DomainModel(QObject):
         # self.vendorList = dict()
         # self.devtypeList = dict()
         #
-        # self.deviceMapModel = None
+        self.clientMapModel = None
         # self.vendorMapModel = None
         # self.devtypeMapModel = None
 
-    # def buildDeviceMapModel(self, origin: int):
-    #     if origin == 0:   # all devices
-    #         return MapModel(self, {k: v.item_name for k, v in self.deviceList.items()})
-    #     else:
-    #         # 1 = import, 2 = homebrew
-    #         return MapModel(self, {k: v.item_name for k, v in self.deviceList.items() if v.item_origin == origin})
+    def buildClientMapModel(self):
+        self.clientMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[0]))
 
     # def builVendorMapModel(self):
     #     self.vendorMapModel = MapModel(self, {k: v[0] for k, v in self.vendorList.items()})
@@ -51,6 +47,7 @@ class DomainModel(QObject):
     def initModel(self):
         print("init domain model")
         self.contractList = self._persistenceFacade.getContractList()
+        self.buildClientMapModel()
         # self.vendorList = self._persistenceFacade.getVendorDict()
         # self.devtypeList = self._persistenceFacade.getDevtypeDict()
         # self.substMap = self._persistenceFacade.getSubstMap()

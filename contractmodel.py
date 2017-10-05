@@ -36,10 +36,53 @@ class ContractModel(QAbstractItemModel):
 
     ColumnId = 0
     ColumnIndex = ColumnId + 1
-    ColumnClient = ColumnIndex + 1
-    ColumnCount = ColumnClient + 1
+    ColumnShipYear = ColumnIndex + 1   # synthetic column
+    ColumnClient = ColumnShipYear + 1
+    ColumnProjectCode = ColumnClient + 1
+    ColumnProduct = ColumnProjectCode + 1   # synthetic column
+    ColumnRequestNum = ColumnProduct + 1
+    ColumnRequestDate = ColumnRequestNum + 1
+    ColumnDogozName = ColumnRequestDate + 1
+    ColumnDogozDate = ColumnDogozName + 1
+    ColumnDeviceRequestNum = ColumnDogozDate + 1
+    ColumnDeviceRequestCode = ColumnDeviceRequestNum + 1
+    ColumnContractNum = ColumnDeviceRequestCode + 1
+    ColumnContractDate = ColumnContractNum + 1
+    ColumnSpecReturnDate = ColumnContractDate + 1
+    ColumnSum = ColumnSpecReturnDate + 1
+    ColumnBillNum = ColumnSum + 1
+    ColumnBillDate = ColumnBillNum + 1
+    ColumnMilDate = ColumnBillDate + 1
+    ColumnAddLetterDate = ColumnMilDate + 1
+    ColumnResponseDate = ColumnAddLetterDate + 1
+    ColumnPaymentOrderNum = ColumnResponseDate + 1
+    ColumnPaymentDate = ColumnPaymentOrderNum + 1
+    ColumnMatPurchaseDate = ColumnPaymentDate + 1
+    ColumnMinShipDate = ColumnMatPurchaseDate + 1   # synthetic
+    ColumnMaxShipDate = ColumnMinShipDate + 1   # synthetic
+    ColumnPlanShipmentDate = ColumnMaxShipDate + 1
+    ColumnShipmentPeriod = ColumnPlanShipmentDate + 1
+    ColumnInvoiceNum = ColumnShipmentPeriod + 1
+    ColumnInvoiceDate = ColumnInvoiceNum + 1
+    ColumnPackingListNum = ColumnInvoiceDate + 1
+    ColumnPackingListDate = ColumnPackingListNum + 1
+    ColumnShipNote = ColumnPackingListDate + 1
+    ColumnShipDate = ColumnShipNote + 1
+    ColumnCompleted = ColumnShipDate + 1
+    ColumnContacts = ColumnCompleted + 1
+    ColumnTaskDays = ColumnContacts + 1
+    ColumnSpecDays = ColumnTaskDays + 1
+    ColumnMilDays = ColumnSpecDays + 1
+    ColumnClientDays = ColumnMilDays + 1
+    ColumnPaymentDays = ColumnClientDays + 1
+    ColumnMiscData = ColumnPaymentDays + 1
+    ColumnCount = ColumnMiscData + 1
 
-    _headers = ["id", "index", "client"]
+    _headers = ["id", "index", "shipyear", "client", "projcode", "prod", "reqnum", "reqdate", "dogozname", "dogozdate",
+                "devreqnum", "devreqcode", "connum", "condate", "specretdate", "sum", "billnum", "billdate", "mildate",
+                "addletterdate", "responsedate", "paynum", "paydate", "matpurchdate", "mindate", "maxdate", "plandate",
+                "shipperiod", "invoicenum", "invoicedate", "packlistnum", "packlistdate", "shipnote", "shipdate",
+                "complete", "contacts", "taskd", "specd", "mild", "cliemntd", "payd", "misc"]
 
     def __init__(self, parent=None, domainModel=None):
         super(ContractModel, self).__init__(parent)
@@ -148,8 +191,93 @@ class ContractModel(QAbstractItemModel):
                 return QVariant(item.item_id)
             elif col == self.ColumnIndex:
                 return QVariant(item.item_index)
+            elif col == self.ColumnShipYear:
+                return QVariant("[calc]")   # TODO make synthetic formulas
             elif col == self.ColumnClient:
-                return QVariant(item.item_clientRef)
+                return QVariant(self._modelDomain.clientMapModel.getData(item.item_clientRef))
+            elif col == self.ColumnProjectCode:
+                return QVariant(item.item_projCode)
+            elif col == self.ColumnProduct:
+                return QVariant("[calc]")
+            elif col == self.ColumnRequestNum:
+                return QVariant(item.item_requestN)
+            elif col == self.ColumnRequestDate:
+                return QVariant(str(item.item_requestDate))   # TODO format all dates
+            elif col == self.ColumnDogozName:
+                return QVariant(item.item_dogozName)
+            elif col == self.ColumnDogozDate:
+                return QVariant(str(item.item_dogozDate))
+            elif col == self.ColumnDeviceRequestNum:
+                return QVariant(item.item_deviceRequestN)
+            elif col == self.ColumnDeviceRequestCode:
+                return QVariant(item.item_deviceRequestCode)
+            elif col == self.ColumnContractNum:
+                return QVariant(item.item_contractN)
+            elif col == self.ColumnContractDate:
+                return QVariant(str(item.item_contractDate))
+            elif col == self.ColumnSpecReturnDate:
+                return QVariant(str(item.item_specReturnDate))
+            elif col == self.ColumnSum:
+                return QVariant(item.item_sum)   # TODO format suf output
+            elif col == self.ColumnBillNum:
+                return QVariant(item.item_billNumber)
+            elif col == self.ColumnBillDate:
+                return QVariant(str(item.item_billDate))
+            elif col == self.ColumnMilDate:
+                return QVariant(str(item.item_milDate))
+            elif col == self.ColumnAddLetterDate:
+                return QVariant(str(item.item_addLetterDate))
+            elif col == self.ColumnResponseDate:
+                return QVariant(str(item.item_responseDate))
+            elif col == self.ColumnPaymentOrderNum:
+                return QVariant(item.item_paymentOrderN)
+            elif col == self.ColumnPaymentDate:
+                return QVariant(str(item.item_paymentDate))
+            elif col == self.ColumnMatPurchaseDate:
+                return QVariant(str(item.item_matPurchaseDate))
+            elif col == self.ColumnMinShipDate:
+                return QVariant("[calc]")
+            elif col == self.ColumnMaxShipDate:
+                return QVariant("[calc]")
+            elif col == self.ColumnPlanShipmentDate:
+                return QVariant(str(item.item_planShipmentDate))
+            elif col == self.ColumnShipmentPeriod:
+                return QVariant(item.item_shipmentPeriod)
+            elif col == self.ColumnInvoiceNum:
+                return QVariant(item.item_invoiceN)
+            elif col == self.ColumnInvoiceDate:
+                return QVariant(str(item.item_invoiceDate))
+            elif col == self.ColumnPackingListNum:
+                return QVariant(item.item_packingListN)
+            elif col == self.ColumnPackingListDate:
+                return QVariant(str(item.item_packingListDate))
+            elif col == self.ColumnShipNote:
+                return QVariant(item.item_shipNote)
+            elif col == self.ColumnShipDate:
+                return QVariant(str(item.item_shipDate))
+            # elif col == self.ColumnCompleted:
+            #     return QVariant(item.item_completed)
+            elif col == self.ColumnContacts:
+                return QVariant(item.item_contacts)
+            elif col == self.ColumnTaskDays:
+                return QVariant("[calc]")
+            elif col == self.ColumnSpecDays:
+                return QVariant("[calc]")
+            elif col == self.ColumnMilDays:
+                return QVariant("[calc]")
+            elif col == self.ColumnClientDays:
+                return QVariant("[calc]")
+            elif col == self.ColumnPaymentDays:
+                return QVariant("[calc]")
+            elif col == self.ColumnMiscData:
+                return QVariant("[calc]")
+
+        elif role == Qt.CheckStateRole:
+            if col == self.ColumnCompleted:
+                if item.item_completed == 0:
+                    return QVariant(0)
+                elif item.item_completed == 1:
+                    return QVariant(2)
 
         # elif role == Qt.BackgroundRole:
         #     retcolor = Qt.white;
@@ -185,8 +313,10 @@ class ContractModel(QAbstractItemModel):
 
         return QVariant()
 
-    # def flags(self, index):
+    # def flags(self, index: QModelIndex):
     #     f = super(DeviceListModel, self).flags(index)
+    #     if index.column() == self.ColumnCompleted:
+    #         f = f & Qt.ItemIsUserCheckable
     #     return f
 
     @pyqtSlot(int)

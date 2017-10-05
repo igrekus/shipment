@@ -76,10 +76,14 @@ class MysqlEngine(QObject):
         print("query:", cur._last_executed, "| rows:", cur.rowcount)
         return cur
 
-    # domain-specific methods
-    def fetchContractList(self):
+    def fetchMainData(self):
         return self.execSimpleQuery(self._dbItemClass.itemListRequestString()).fetchall()
-    #
+
+    def fetchDict(self, name):
+        # TODO make dict ORM
+        return self.execSimpleQuery("CALL get" + name + "List()").fetchall()
+
+    # domain-specific methods
     # def fetchSubstMap(self):
     #     return self.execSimpleQuery("CALL getSubstMap()").fetchall()
     #
