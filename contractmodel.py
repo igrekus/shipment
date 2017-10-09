@@ -1,6 +1,6 @@
 import const
+import datetime
 from PyQt5.QtCore import Qt, QModelIndex, QVariant, QDate, pyqtSlot, pyqtSignal, QAbstractItemModel
-
 from contractitem import ContractItem
 
 
@@ -179,6 +179,41 @@ class ContractModel(QAbstractItemModel):
     #     return True
 
     def data(self, index: QModelIndex, role=None):
+
+        def getColumnProduct(model, item: ContractItem):
+            return "".join(
+                [model.productMapModel.getData(r[1]) + "/" for r in model.contractDetailList[item.item_id]]).strip("/")
+
+        def getColumnPaymentDays(item: ContractItem):
+            if not isinstance(item.item_paymentDate, datetime.date) \
+                    or not isinstance(item.item_billDate, datetime.date):
+                return str("N/A")
+            return str((item.item_billDate - item.item_paymentDate).days)
+
+        def getColumnClientDays(item: ContractItem):
+            if not isinstance(item.item_responseDate, datetime.date) \
+                    or not isinstance(item.item_addLetterDate, datetime.date):
+                return str("N/A")
+            return str((item.item_responseDate - item.item_addLetterDate).days)
+
+        def getColumnMilDays(item: ContractItem):
+            if not isinstance(item.item_addLetterDate, datetime.date) \
+                    or not isinstance(item.item_milDate, datetime.date):
+                return str("N/A")
+            return str((item.item_addLetterDate - item.item_milDate).days)
+
+        def getColumnSpecDays(item: ContractItem):
+            if not isinstance(item.item_milDate, datetime.date) \
+                    or not isinstance(item.item_specReturnDate, datetime.date):
+                return str("N/A")
+            return str((item.item_milDate - item.item_specReturnDate).days)
+
+        def getColumnTaskDays(item: ContractItem):
+            if not isinstance(item.item_specReturnDate, datetime.date) \
+                    or not isinstance(item.item_requestDate, datetime.date):
+                return str("N/A")
+            return str((item.item_specReturnDate - item.item_requestDate).days)
+
         if not index.isValid():
             return QVariant()
 
@@ -192,13 +227,15 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnIndex:
                 return QVariant(item.item_index)
             elif col == self.ColumnShipYear:
-                return QVariant("[calc]")   # TODO make synthetic formulas
+                if not isinstance(item.item_paymentDate, datetime.date):
+                    return QVariant("N/A")
+                return QVariant((item.item_paymentDate + datetime.timedelta(days=89)).year)
             elif col == self.ColumnClient:
                 return QVariant(self._modelDomain.clientMapModel.getData(item.item_clientRef))
             elif col == self.ColumnProjectCode:
                 return QVariant(item.item_projCode)
             elif col == self.ColumnProduct:
-                return QVariant("[calc]")
+                return QVariant(getColumnProduct(self._modelDomain, item))
             elif col == self.ColumnRequestNum:
                 return QVariant(item.item_requestN)
             elif col == self.ColumnRequestDate:
@@ -236,9 +273,13 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnMatPurchaseDate:
                 return QVariant(str(item.item_matPurchaseDate))
             elif col == self.ColumnMinShipDate:
-                return QVariant("[calc]")
+                if not isinstance(item.item_paymentDate, datetime.date):
+                    return QVariant("N/A")
+                return QVariant(str(item.item_paymentDate + datetime.timedelta(days=89)))
             elif col == self.ColumnMaxShipDate:
-                return QVariant("[calc]")
+                if not isinstance(item.item_paymentDate, datetime.date):
+                    return QVariant("N/A")
+                return QVariant(str(item.item_paymentDate + datetime.timedelta(days=item.item_shipmentPeriod - 1)))
             elif col == self.ColumnPlanShipmentDate:
                 return QVariant(str(item.item_planShipmentDate))
             elif col == self.ColumnShipmentPeriod:
@@ -260,17 +301,19 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnContacts:
                 return QVariant(item.item_contacts)
             elif col == self.ColumnTaskDays:
-                return QVariant("[calc]")
+                return QVariant(getColumnTaskDays(item))
             elif col == self.ColumnSpecDays:
-                return QVariant("[calc]")
+                return QVariant(getColumnSpecDays(item))
             elif col == self.ColumnMilDays:
-                return QVariant("[calc]")
+                return QVariant(getColumnMilDays(item))
             elif col == self.ColumnClientDays:
-                return QVariant("[calc]")
+                return QVariant(getColumnClientDays(item))
             elif col == self.ColumnPaymentDays:
-                return QVariant("[calc]")
+                return QVariant(getColumnPaymentDays(item))
             elif col == self.ColumnMiscData:
-                return QVariant("[calc]")
+                return QVariant("Заявка " + item.item_requestN +
+                                " от " + str(item.item_requestDate) +
+                                " на " + getColumnProduct(self._modelDomain, item))
 
         elif role == Qt.CheckStateRole:
             if col == self.ColumnCompleted:

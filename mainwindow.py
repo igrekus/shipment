@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         self.ui.treeContract.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.ui.treeContract.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # formatting
-        self.ui.treeContract.setUniformRowHeights(True)
+        # self.ui.treeContract.setUniformRowHeights(True)
         self.ui.treeContract.header().setHighlightSections(False)
         self.ui.treeContract.header().setStretchLastSection(True)
 

@@ -84,9 +84,9 @@ class MysqlEngine(QObject):
         return self.execSimpleQuery("CALL get" + name + "List()").fetchall()
 
     # domain-specific methods
-    # def fetchSubstMap(self):
-    #     return self.execSimpleQuery("CALL getSubstMap()").fetchall()
-    #
+    def fetchContractDetailList(self):
+        return self.execSimpleQuery("CALL getContractDetailList()").fetchall()
+
     # def fetchVendorList(self):
     #     return self.execSimpleQuery("CAll getVendorList()").fetchall()
     #

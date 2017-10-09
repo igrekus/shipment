@@ -6,7 +6,7 @@ from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
 
 class DomainModel(QObject):
 
-    dict_list = ["client"]
+    dict_list = ["client", "product"]
 
     contractAdded = pyqtSignal(int)
     contractUpdated = pyqtSignal(int)
@@ -18,25 +18,16 @@ class DomainModel(QObject):
         self._persistenceFacade = persistenceFacade
 
         self.contractList = dict()
-        # self.substMap = dict()
-        #
-        # self.vendorList = dict()
-        # self.devtypeList = dict()
-        #
+        self.contractDetailList = dict()
+
         self.clientMapModel = None
-        # self.vendorMapModel = None
-        # self.devtypeMapModel = None
+        self.productMapModel = None
 
     def buildClientMapModel(self):
         self.clientMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[0]))
 
-    # def builVendorMapModel(self):
-    #     self.vendorMapModel = MapModel(self, {k: v[0] for k, v in self.vendorList.items()})
-    #     self.vendorMapModel.addItemAtPosition(0, 0, "Все")
-    #
-    # def buildDevtypeMapModel(self):
-    #     self.devtypeMapModel = MapModel(self, self.devtypeList)
-    #     self.devtypeMapModel.addItemAtPosition(0, 0, "Все")
+    def buildProductMapModel(self):
+        self.productMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[1]))
 
     # def buildMapModels(self):
     #     print("building map models")
@@ -47,10 +38,9 @@ class DomainModel(QObject):
     def initModel(self):
         print("init domain model")
         self.contractList = self._persistenceFacade.getContractList()
+        self.contractDetailList = self._persistenceFacade.getContractDetailList()
         self.buildClientMapModel()
-        # self.vendorList = self._persistenceFacade.getVendorDict()
-        # self.devtypeList = self._persistenceFacade.getDevtypeDict()
-        # self.substMap = self._persistenceFacade.getSubstMap()
+        self.buildProductMapModel()
         # self.buildMapModels()
 
     def getItemById(self, id_):

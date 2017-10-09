@@ -20,6 +20,12 @@ class PersistenceFacade(QObject):
     def getContractList(self):
         return {r[0]: ContractItem.fromSqlTuple(r) for r in self._engine.fetchMainData()}
 
+    def getContractDetailList(self):
+        d = defaultdict(list)
+        for r in self._engine.fetchContractDetailList():
+            d[r[0]].append([r[1], r[2], r[3]])
+        return d
+
     def getDict(self, name):
         return {r[0]: r[1] for r in self._engine.fetchDict(name)}
 
