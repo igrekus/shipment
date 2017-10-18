@@ -100,7 +100,7 @@ class MainWindow(QMainWindow):
 
         # tree and selection
         # self.ui.treeDeviceList.selectionModel().currentChanged.connect(self.onCurrentTreeItemChanged)
-        # self.ui.treeDeviceList.doubleClicked.connect(self.onTreeDoubleClicked)
+        self.ui.treeContract.doubleClicked.connect(self.onTreeContractDoubleClicked)
 
         # search widgets
         # self.ui.comboVendorFilter.currentIndexChanged.connect(self.setSearchFilter)
@@ -154,9 +154,9 @@ class MainWindow(QMainWindow):
     #     sourceIndex = self._modelSearchProxy.mapToSource(cur)
     #     self.updateItemInfo(sourceIndex)
 
-    # def onTreeDoubleClicked(self, index):
-    #     # if index.column() != 0:
-    #     self.actDeviceEdit.trigger()
+    def onTreeContractDoubleClicked(self, index):
+        # if index.column() != 0:
+        self.actContractEdit.trigger()
 
     # def setSearchFilter(self, dummy=0):
     #     self._modelSearchProxy.filterString = self.ui.editSearch.text()
@@ -182,17 +182,15 @@ class MainWindow(QMainWindow):
         self.refreshView()
 
     def procActContractAdd(self):
-        print("add contract")
-        # self._uiFacade.requestDeviceAdd()
+        self._uiFacade.requestContractAdd()
 
     def procActContractEdit(self):
-        print("edit contract")
-        # if not self.ui.treeDeviceList.selectionModel().hasSelection():
-        #     QMessageBox.information(self, "Ошибка!", "Выберите запись о приборе для редактирования.")
-        #     return False
+        if not self.ui.treeContract.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка!", "Выберите запись о контракте для редактирования.")
+            return False
 
-        # selectedIndex = self.ui.treeDeviceList.selectionModel().selectedIndexes()[0]
-        # self._uiFacade.requestDeviceEdit(self._modelSearchProxy.mapToSource(selectedIndex))
+        selectedIndex = self.ui.treeContract.selectionModel().selectedIndexes()[0]
+        self._uiFacade.requestContractEdit(self._modelSearchProxy.mapToSource(selectedIndex))
 
     def procActContractDelete(self):
         print("delete contract")

@@ -10,7 +10,7 @@ class ContractItem:
                  addLetterDate=None, responseDate=None, paymentOrderN=None, paymentDate=None,
                  matPurchaseDate=None, planShipmentDate=None,
                  shipmentPeriod=None, invoiceN=None, invoiceDate=None, packingListN=None, packingListDate=None,
-                 shipNote=None, shipDate=None, completed=None, contacts=None):
+                 shipNote=None, shipDate=None, completed=None, contacts=None, manufPlanDate=None):
         self.item_id = id_
         self.item_index = index
         self.item_clientRef = clientRef
@@ -43,6 +43,7 @@ class ContractItem:
         self.item_shipDate = shipDate
         self.item_completed = completed
         self.item_contacts = contacts
+        self.item_manufPlanDate = manufPlanDate
 
     def __str__(self):
         return "ContractItem(" + "id:" + str(self.item_id) + " " \
@@ -76,7 +77,8 @@ class ContractItem:
                + "shipn:" + str(self.item_shipNote) + " " \
                + "shipd:" + str(self.item_shipDate) + " " \
                + "compl:" + str(self.item_completed) + " " \
-               + "contact:" + str(self.item_contacts) + ")"
+               + "contact:" + str(self.item_contacts) + " " \
+               + "manuf:" + str(self.item_manufPlanDate) + ")"
 
     @classmethod
     def fromSqlTuple(cls, sql_tuple: tuple):
@@ -111,7 +113,8 @@ class ContractItem:
                    shipNote=sql_tuple[28],
                    shipDate=sql_tuple[29],
                    completed=sql_tuple[30],
-                   contacts=sql_tuple[31])
+                   contacts=sql_tuple[31],
+                   manufPlanDate=sql_tuple[32])
 
     def toTuple(self):
         return tuple([self.item_index,
@@ -145,6 +148,7 @@ class ContractItem:
                       self.item_shipDate,
                       self.item_completed,
                       self.item_contacts,
+                      self.item_manufPlanDate,
                       self.item_id])
 
     @classmethod
