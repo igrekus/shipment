@@ -2,9 +2,8 @@ import const
 from PyQt5.QtCore import QObject, QModelIndex, Qt
 from PyQt5.QtWidgets import QDialog, QMessageBox
 
-# from deviceeditor import DeviceEditor
-# from deviceitem import DeviceItem
-# from dicteditor import DictEditor
+from contractitem import ContractItem
+from dlgcontractdata import DlgContractData
 
 
 class UiFacade(QObject):
@@ -32,30 +31,30 @@ class UiFacade(QObject):
     #            "\n\nТип устройства:\n" + self._domainModel.getDevtypeById(item.item_devtype) + \
     #            "\n\nОписание:\n" + item.item_desc + \
     #            "\n\nПараметры:\n" + item.item_spec
-    #
-    # def requestDeviceAdd(self):
-    #     print("ui facade add device request")
-    #     dialog = DeviceEditor(domainModel=self._domainModel, data=DeviceItem(), mapping=list())  # empty dialog for new item
-    #
-    #     if dialog.exec() != QDialog.Accepted:
-    #         return
-    #
-    #     newItem, mapping = dialog.getData()
-    #     self._domainModel.addDeviceItem(newItem, mapping)
-    #
-    # def requestDeviceEdit(self, index: QModelIndex):
-    #     item = self._domainModel.getItemById(index.data(const.RoleNodeId))
-    #     print("ui facade edit device request", item)
-    #
-    #     dialog = DeviceEditor(domainModel=self._domainModel, data=item,
-    #                           mapping=self._domainModel.substMap[item.item_id])
-    #
-    #     if dialog.exec() != QDialog.Accepted:
-    #         return
-    #
-    #     item, mapping = dialog.getData()
-    #     self._domainModel.updateDeviceItem(item, mapping)
-    #
+
+    def requestContractAdd(self):
+        print("ui facade add contract request")
+        dialog = DlgContractData(domainModel=self._domainModel, item=None)  # empty dialog for a new item
+
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        # newItem, mapping = dialog.getData()
+        # self._domainModel.addDeviceItem(newItem, mapping)
+
+    def requestContractEdit(self, index: QModelIndex):
+        item: ContractItem = self._domainModel.getItemById(index.data(const.RoleNodeId))
+        print("ui facade edit device request", item)
+
+        dialog = DlgContractData(domainModel=self._domainModel, item=item,
+                                 products=self._domainModel.contractDetailList[item.item_id])
+
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        # item, mapping = dialog.getData()
+        # self._domainModel.updateDeviceItem(item, mapping)
+
     # def requestDeviceDelete(self, index: QModelIndex):
     #     item = self._domainModel.getItemById(index.data(const.RoleNodeId))
     #     print("ui facade delete device request", item)

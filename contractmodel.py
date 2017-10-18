@@ -36,10 +36,10 @@ class ContractModel(QAbstractItemModel):
 
     ColumnId = 0
     ColumnIndex = ColumnId + 1
-    ColumnShipYear = ColumnIndex + 1   # synthetic column
+    ColumnShipYear = ColumnIndex + 1                # synthetic
     ColumnClient = ColumnShipYear + 1
     ColumnProjectCode = ColumnClient + 1
-    ColumnProduct = ColumnProjectCode + 1   # synthetic column
+    ColumnProduct = ColumnProjectCode + 1           # synthetic
     ColumnRequestNum = ColumnProduct + 1
     ColumnRequestDate = ColumnRequestNum + 1
     ColumnDogozName = ColumnRequestDate + 1
@@ -59,9 +59,10 @@ class ContractModel(QAbstractItemModel):
     ColumnPaymentDate = ColumnPaymentOrderNum + 1
     ColumnMatPurchaseDate = ColumnPaymentDate + 1
     ColumnMinShipDate = ColumnMatPurchaseDate + 1   # synthetic
-    ColumnMaxShipDate = ColumnMinShipDate + 1   # synthetic
+    ColumnMaxShipDate = ColumnMinShipDate + 1       # synthetic
     ColumnPlanShipmentDate = ColumnMaxShipDate + 1
-    ColumnShipmentPeriod = ColumnPlanShipmentDate + 1
+    ColumnManufPlanDate = ColumnPlanShipmentDate + 1
+    ColumnShipmentPeriod = ColumnManufPlanDate + 1
     ColumnInvoiceNum = ColumnShipmentPeriod + 1
     ColumnInvoiceDate = ColumnInvoiceNum + 1
     ColumnPackingListNum = ColumnInvoiceDate + 1
@@ -81,8 +82,8 @@ class ContractModel(QAbstractItemModel):
     _headers = ["id", "index", "shipyear", "client", "projcode", "prod", "reqnum", "reqdate", "dogozname", "dogozdate",
                 "devreqnum", "devreqcode", "connum", "condate", "specretdate", "sum", "billnum", "billdate", "mildate",
                 "addletterdate", "responsedate", "paynum", "paydate", "matpurchdate", "mindate", "maxdate", "plandate",
-                "shipperiod", "invoicenum", "invoicedate", "packlistnum", "packlistdate", "shipnote", "shipdate",
-                "complete", "contacts", "taskd", "specd", "mild", "cliemntd", "payd", "misc"]
+                "manufdate", "shipperiod", "invoicenum", "invoicedate", "packlistnum", "packlistdate", "shipnote",
+                "shipdate", "complete", "contacts", "taskd", "specd", "mild", "cliemntd", "payd", "misc"]
 
     def __init__(self, parent=None, domainModel=None):
         super(ContractModel, self).__init__(parent)
@@ -181,8 +182,8 @@ class ContractModel(QAbstractItemModel):
     def data(self, index: QModelIndex, role=None):
 
         def getColumnProduct(model, item: ContractItem):
-            return "".join(
-                [model.productMapModel.getData(r[1]) + "/" for r in model.contractDetailList[item.item_id]]).strip("/")
+            return "".join([model.productMapModel.getData(r[1]) + " (" + str(r[2]) + " шт.)/" for r in
+                            model.contractDetailList[item.item_id]]).strip("/")
 
         def getColumnPaymentDays(item: ContractItem):
             if not isinstance(item.item_paymentDate, datetime.date) \
@@ -282,6 +283,8 @@ class ContractModel(QAbstractItemModel):
                 return QVariant(str(item.item_paymentDate + datetime.timedelta(days=item.item_shipmentPeriod - 1)))
             elif col == self.ColumnPlanShipmentDate:
                 return QVariant(str(item.item_planShipmentDate))
+            elif col == self.ColumnManufPlanDate:
+                return QVariant(str(item.item_manufPlanDate))
             elif col == self.ColumnShipmentPeriod:
                 return QVariant(item.item_shipmentPeriod)
             elif col == self.ColumnInvoiceNum:

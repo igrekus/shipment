@@ -106,3 +106,6 @@ class MapModel(QAbstractListModel):
 
     def getData(self, id_=None):
         return self.mapData[id_]
+
+    def getIdByIndex(self, index):
+        return self.getId(self.strList[index])

@@ -6,11 +6,11 @@ setOutDir(__name__)
 
 
 def main():
-    import csv
-    l = list()
-    with open("ref/tnew.csv") as f:
-        d = csv.reader(f, delimiter=";")
-        for a in d:
+    # import csv
+    # l = list()
+    # with open("ref/tnew.csv") as f:
+    #     d = csv.reader(f, delimiter=";")
+    #     for a in d:
             # print(print(len(a), a))
             # string = "('" + a[0] + "'," + \
             #          a[1] + ",'" + \
