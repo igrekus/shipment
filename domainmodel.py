@@ -20,8 +20,8 @@ class DomainModel(QObject):
         self.contractList = dict()
         self.contractDetailList = dict()
 
-        self.clientMapModel = None
-        self.productMapModel = None
+        self.clientMapModel: MapModel = None
+        self.productMapModel: MapModel = None
 
     def buildClientMapModel(self):
         self.clientMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[0]))
@@ -29,19 +29,15 @@ class DomainModel(QObject):
     def buildProductMapModel(self):
         self.productMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[1]))
 
-    # def buildMapModels(self):
-    #     print("building map models")
-    #     self.deviceMapModel = self.buildDeviceMapModel(origin=0)
-    #     self.builVendorMapModel()
-    #     self.buildDevtypeMapModel()
-
     def initModel(self):
         print("init domain model")
         self.contractList = self._persistenceFacade.getContractList()
         self.contractDetailList = self._persistenceFacade.getContractDetailList()
         self.buildClientMapModel()
+        self.clientMapModel.addItemAtPosition(0, 0, "Все")
+
         self.buildProductMapModel()
-        # self.buildMapModels()
+        self.productMapModel.addItemAtPosition(0, 0, "Все")
 
     def getItemById(self, id_):
         return self.contractList[id_]

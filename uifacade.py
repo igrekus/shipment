@@ -1,3 +1,5 @@
+from functools import reduce
+
 import const
 from PyQt5.QtCore import QObject, QModelIndex, Qt
 from PyQt5.QtWidgets import QDialog, QMessageBox
@@ -32,26 +34,55 @@ class UiFacade(QObject):
     #            "\n\nОписание:\n" + item.item_desc + \
     #            "\n\nПараметры:\n" + item.item_spec
 
+    def findDiffBetweenProductLists(self, old: list, new: list):
+        added = list()
+        changed = list()
+        deleted = list()
+
+        for n in new:
+            if n in old:
+                continue
+            elif any(o[0] == n[0] for o in old):
+                changed.append(n)
+            else:
+                added.append(n)
+
+        for o in old:
+            if not any(n[0] == o[0] for n in new):
+                deleted.append(o)
+
+        return added, changed, deleted
+
     def requestContractAdd(self):
         print("ui facade add contract request")
-        dialog = DlgContractData(domainModel=self._domainModel, item=None)  # empty dialog for a new item
+        dialog = DlgContractData(domainModel=self._domainModel, item=None, products=None)  # empty dialog for a new item
 
         if dialog.exec() != QDialog.Accepted:
             return
 
-        # newItem, mapping = dialog.getData()
+        newItem, products = dialog.getData()
+        print(newItem)
+        print(products)
         # self._domainModel.addDeviceItem(newItem, mapping)
 
     def requestContractEdit(self, index: QModelIndex):
         item: ContractItem = self._domainModel.getItemById(index.data(const.RoleNodeId))
         print("ui facade edit device request", item)
 
+        oldProducts = self._domainModel.contractDetailList[item.item_id]
         dialog = DlgContractData(domainModel=self._domainModel, item=item,
-                                 products=self._domainModel.contractDetailList[item.item_id])
+                                 products=oldProducts)
 
         if dialog.exec() != QDialog.Accepted:
             return
 
+        newItem, newProducts = dialog.getData()
+
+        added, changed, deleted = self.findDiffBetweenProductLists(oldProducts, newProducts)
+
+        print(changed)
+        print(added)
+        print(deleted)
         # item, mapping = dialog.getData()
         # self._domainModel.updateDeviceItem(item, mapping)
 

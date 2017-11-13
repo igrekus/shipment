@@ -1,13 +1,13 @@
 import sys
 import const
 import datetime
-from copy import copy
+from copy import deepcopy
 from comboboxdelegate import ComboBoxDelegate
 from contractitem import ContractItem
 from productlistmodel import ProductListModel
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QMessageBox, QTableView
-from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtCore import Qt, QDate, QModelIndex
 
 from spinboxdelegate import SpinBoxDelegate
 
@@ -30,7 +30,10 @@ class DlgContractData(QDialog):
         # data members
         self._currentItem: ContractItem = item
         self.newItem = None
-        self._productList = copy(products)
+        self._productList = list()
+        if products is not None:
+            self._productList = deepcopy(products)
+
         self._productModel = ProductListModel(self, self._domainModel)
 
         self.initDialog()
@@ -78,7 +81,7 @@ class DlgContractData(QDialog):
         self.ui.editDevRequestCode.setText(self._currentItem.item_deviceRequestCode)
         self.ui.editContractN.setText(self._currentItem.item_contractN)
         self.ui.dateContract.setDate(formatDate(self._currentItem.item_contractDate))
-        self.ui.dateSpectReturn.setDate(formatDate(self._currentItem.item_specReturnDate))
+        self.ui.dateSpecReturn.setDate(formatDate(self._currentItem.item_specReturnDate))
         self.ui.spinSum.setValue(float(self._currentItem.item_sum)/100)
         self.ui.editBillN.setText(self._currentItem.item_billNumber)
         self.ui.dateBill.setDate(formatDate(self._currentItem.item_billDate))
@@ -101,36 +104,37 @@ class DlgContractData(QDialog):
         self.ui.textContact.setPlainText(self._currentItem.item_contacts)
 
     def resetWidgets(self):
+        currentDate = QDate().currentDate()
         self.ui.editIndex.setText("")
         self.ui.comboClient.setCurrentIndex(0)
         self.ui.editProject.setText("")
         self.ui.editRequestN.setText("")
-        self.ui.dateRequest.setDate(QDate().currentDate())
+        self.ui.dateRequest.setDate(currentDate)
         self.ui.editDogozN.setText("")
-        self.ui.dateDogoz.setDate(QDate().currentDate())
+        self.ui.dateDogoz.setDate(currentDate)
         self.ui.editDevRequestN.setText("")
         self.ui.editDevRequestCode.setText("")
         self.ui.editContractN.setText("")
-        self.ui.dateContract.setDate(QDate().currentDate())
-        self.ui.dateSpectReturn.setDate(QDate().currentDate())
+        self.ui.dateContract.setDate(currentDate)
+        self.ui.dateSpecReturn.setDate(currentDate)
         self.ui.spinSum.setValue(0)
         self.ui.editBillN.setText("")
-        self.ui.dateBill.setDate(QDate().currentDate())
-        self.ui.dateMil.setDate(QDate().currentDate())
-        self.ui.dateAddLetter.setDate(QDate().currentDate())
-        self.ui.dateResponse.setDate(QDate().currentDate())
+        self.ui.dateBill.setDate(currentDate)
+        self.ui.dateMil.setDate(currentDate)
+        self.ui.dateAddLetter.setDate(currentDate)
+        self.ui.dateResponse.setDate(currentDate)
         self.ui.editPaymentN.setText("")
-        self.ui.datePayment.setDate(QDate().currentDate())
-        self.ui.dateMatPurchase.setDate(QDate().currentDate())
-        self.ui.datePlanShip.setDate(QDate().currentDate())
-        self.ui.dateManufPlan.setDate(QDate().currentDate())
-        self.ui.spinShipPeriod.setValue(0)
+        self.ui.datePayment.setDate(currentDate)
+        self.ui.dateMatPurchase.setDate(currentDate)
+        self.ui.datePlanShip.setDate(currentDate)
+        self.ui.dateManufPlan.setDate(currentDate)
+        self.ui.spinShipPeriod.setValue(180)
         self.ui.editInvoiceN.setText("")
-        self.ui.dateInvoice.setDate(QDate().currentDate())
+        self.ui.dateInvoice.setDate(currentDate)
         self.ui.editPacklistN.setText("")
-        self.ui.datePacklist.setDate(QDate().currentDate())
+        self.ui.datePacklist.setDate(currentDate)
         self.ui.editShipNote.setText("")
-        self.ui.dateShip.setDate(QDate().currentDate())
+        self.ui.dateShip.setDate(currentDate)
         self.ui.checkComplete.setChecked(False)
         self.ui.textContact.setPlainText("")
 
@@ -140,38 +144,104 @@ class DlgContractData(QDialog):
             QMessageBox.information(self, "Ошибка", "Введите индекс поставки.")
             return False
 
+        if self.ui.comboClient.currentData(const.RoleNodeId) == 0:
+            QMessageBox.information(self, "Ошибка", "Выберите клиента.")
+            return False
+
+        if not self.ui.editProject.text():
+            QMessageBox.information(self, "Ошибка", "Введите код работы.")
+            return False
+
+        if not self.ui.editRequestN.text():
+            QMessageBox.information(self, "Ошибка", "Введите номер запроса.")
+            return False
+
+        if not self.ui.editDogozN.text():
+            QMessageBox.information(self, "Ошибка", "Введите номер ДОГОЗ.")
+            return False
+
+        if self.ui.spinSum.value() <= 0:
+            QMessageBox.information(self, "Ошибка", "Введите сумму.")
+            return False
+
+        if self.ui.spinShipPeriod.value() <= 0:
+            QMessageBox.information(self, "Ошибка", "Введите срок поставки.")
+            return False
+
+        if self._productModel.rowCount() == 0:
+            QMessageBox.information(self, "Ошибка", "Добавьте товары в список.")
+            return False
+        else:
+            for i in range(self._productModel.rowCount()):
+                if self._productModel.data(self._productModel.index(i, 0, QModelIndex()), Qt.DisplayRole).value() == "Все":
+                    QMessageBox.information(self, "Ошибка", "Выберите товар из списка.")
+                    return False
+
         return True
 
     def collectData(self):
-        pass
-        # id_ = None
-        # if self._currentItem is not None:
-        #     id_ = self._currentItem.item_id
+        id_ = None
+        if self._currentItem is not None:
+            id_ = self._currentItem.item_id
 
-        # priority = self.ui.comboPriority.currentData(const.RoleNodeId)
-        # if self.ui.comboStatus.currentData(const.RoleNodeId) == 1:
-        #     priority = 1
-        #
-        # self.newItem = billitem.BillItem(id_=id_
-        #                                  , date=self.ui.dateBill.date().toString("dd.MM.yyyy")
-        #                                  , name=self.ui.editBillName.text()
-        #                                  , category=self.ui.comboCategory.currentData(const.RoleNodeId)
-        #                                  , vendor=self.ui.comboVendor.currentData(const.RoleNodeId)
-        #                                  , cost=int(self.ui.spinCost.value()*100)
-        #                                  , project=self.ui.comboProject.currentData(const.RoleNodeId)
-        #                                  , descript=self.ui.textDescript.toPlainText()
-        #                                  , shipment_time=self.ui.comboPeriod.currentData(const.RoleNodeId)
-        #                                  , status=self.ui.comboStatus.currentData(const.RoleNodeId)
-        #                                  , priority=priority
-        #                                  , shipment_date=self.ui.dateShipment.date().toString("dd.MM.yyyy")
-        #                                  , shipment_status=self.ui.comboShipment.currentData(const.RoleNodeId)
-        #                                  , payment_week=self.ui.spinWeek.value()
-        #                                  , note=self.ui.editNote.text())
+        completed = False
+        if self._currentItem is not None:
+            completed = self._currentItem.item_completed
 
-        # TODO verify data change, reject dialog if not changed
+        # TODO: change date formats
+
+        self.newItem = ContractItem(id_=id_,
+                                    index=self.ui.editIndex.text(),
+                                    clientRef=self.ui.comboClient.currentData(const.RoleNodeId),
+                                    projCode=self.ui.editProject.text(),
+                                    requestN=self.ui.editRequestN.text(),
+                                    requestDate=datetime.datetime.strptime(
+                                        self.ui.dateRequest.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    dogozName=self.ui.dateDogoz.text(),
+                                    dogozDate=datetime.datetime.strptime(
+                                        self.ui.dateDogoz.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    deviceRequestN=self.ui.editDevRequestN.text(),
+                                    deviceRequestCode=self.ui.editDevRequestCode.text(),
+                                    contractN=self.ui.editContractN.text(),
+                                    contractDate=datetime.datetime.strptime(
+                                        self.ui.dateContract.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    specReturnDate=datetime.datetime.strptime(
+                                        self.ui.dateSpecReturn.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    sum=int(self.ui.spinSum.value() * 100),
+                                    billNumber=self.ui.editBillN.text(),
+                                    billDate=datetime.datetime.strptime(self.ui.dateBill.date().toString("yyyy-MM-dd"),
+                                                                        "%Y-%m-%d"),
+                                    milDate=datetime.datetime.strptime(self.ui.dateMil.date().toString("yyyy-MM-dd"),
+                                                                       "%Y-%m-%d"),
+                                    addLetterDate=datetime.datetime.strptime(
+                                        self.ui.dateAddLetter.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    responseDate=datetime.datetime.strptime(
+                                        self.ui.dateResponse.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    paymentOrderN=self.ui.editPaymentN.text(),
+                                    paymentDate=datetime.datetime.strptime(
+                                        self.ui.datePayment.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    matPurchaseDate=datetime.datetime.strptime(
+                                        self.ui.dateMatPurchase.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    planShipmentDate=datetime.datetime.strptime(
+                                        self.ui.datePlanShip.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    shipmentPeriod=self.ui.spinShipPeriod.value(),
+                                    invoiceN=self.ui.editInvoiceN.text(),
+                                    invoiceDate=datetime.datetime.strptime(
+                                        self.ui.dateInvoice.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    packingListN=self.ui.editPacklistN.text(),
+                                    packingListDate=datetime.datetime.strptime(
+                                        self.ui.datePacklist.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                    shipNote=self.ui.editShipNote.text(),
+                                    shipDate=datetime.datetime.strptime(self.ui.dateShip.date().toString("yyyy-MM-dd"),
+                                                                        "%Y-%m-%d"),
+                                    completed=completed,
+                                    contacts=self.ui.textContact.toPlainText(),
+                                    manufPlanDate=datetime.datetime.strptime(
+                                        self.ui.dateManufPlan.date().toString("yyyy-MM-dd"), "%Y-%m-%d"))
+
 
     def getData(self):
-        return self.newItem
+        return self.newItem, self._productList
 
     def onBtnOkClicked(self):
         if not self.verifyInputData():
@@ -184,11 +254,9 @@ class DlgContractData(QDialog):
         print("add client")
 
     def onBtnProductAddClicked(self):
-        print("add product:", self._domainModel.productMapModel.getIdByIndex(0))
-        self._productModel.addRow(self._domainModel.productMapModel.getIdByIndex(0))
+        self._productModel.addProduct(self._domainModel.productMapModel.getIdByIndex(1))
 
     def onBtnProductRemoveClicked(self):
         if not self.ui.tableProduct.selectionModel().hasSelection():
             return
-
-        print("remove product:", self.ui.tableProduct.selectionModel().selectedIndexes()[0].row())
+        self._productModel.removeProduct(self.ui.tableProduct.selectionModel().selectedIndexes()[0].row())
