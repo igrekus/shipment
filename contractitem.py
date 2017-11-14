@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 import const
 
 
@@ -16,7 +18,7 @@ class ContractItem:
         self.item_clientRef = clientRef
         self.item_projCode = projCode
         self.item_requestN = requestN
-        self.item_requestDate = requestDate
+        self.item_requestDate: datetime = requestDate
         self.item_dogozName = dogozName
         self.item_dogozDate = dogozDate
         self.item_deviceRequestN = deviceRequestN
@@ -121,34 +123,34 @@ class ContractItem:
                       self.item_clientRef,
                       self.item_projCode,
                       self.item_requestN,
-                      self.item_requestDate,
+                      self.item_requestDate.date().isoformat(),
                       self.item_dogozName,
-                      self.item_dogozDate,
+                      self.item_dogozDate.date().isoformat(),
                       self.item_deviceRequestN,
                       self.item_deviceRequestCode,
                       self.item_contractN,
-                      self.item_contractDate,
-                      self.item_specReturnDate,
+                      self.item_contractDate.date().isoformat(),
+                      self.item_specReturnDate.date().isoformat(),
                       self.item_sum,
                       self.item_billNumber,
-                      self.item_billDate,
-                      self.item_milDate,
-                      self.item_addLetterDate,
-                      self.item_responseDate,
+                      self.item_billDate.date().isoformat(),
+                      self.item_milDate.date().isoformat(),
+                      self.item_addLetterDate.date().isoformat(),
+                      self.item_responseDate.date().isoformat(),
                       self.item_paymentOrderN,
-                      self.item_paymentDate,
-                      self.item_matPurchaseDate,
-                      self.item_planShipmentDate,
+                      self.item_paymentDate.date().isoformat(),
+                      self.item_matPurchaseDate.date().isoformat(),
+                      self.item_planShipmentDate.date().isoformat(),
                       self.item_shipmentPeriod,
                       self.item_invoiceN,
-                      self.item_invoiceDate,
+                      self.item_invoiceDate.date().isoformat(),
                       self.item_packingListN,
-                      self.item_packingListDate,
+                      self.item_packingListDate.date().isoformat(),
                       self.item_shipNote,
-                      self.item_shipDate,
+                      self.item_shipDate.date().isoformat(),
                       self.item_completed,
                       self.item_contacts,
-                      self.item_manufPlanDate,
+                      self.item_manufPlanDate.date().isoformat(),
                       self.item_id])
 
     @classmethod

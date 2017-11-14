@@ -85,15 +85,17 @@ class ContractModel(QAbstractItemModel):
                 "manufdate", "shipperiod", "invoicenum", "invoicedate", "packlistnum", "packlistdate", "shipnote",
                 "shipdate", "complete", "contacts", "taskd", "specd", "mild", "cliemntd", "payd", "misc"]
 
+
+
     def __init__(self, parent=None, domainModel=None):
         super(ContractModel, self).__init__(parent)
         self._modelDomain = domainModel
 
         self.rootNode = TreeNode(None, None)
 
-        self._modelDomain.contractAdded.connect(self.contractAdded)
-        self._modelDomain.contractUpdated.connect(self.contractUpdated)
-        self._modelDomain.contractRemoved.connect(self.contractRemoved)
+        self._modelDomain.contractAdded.connect(self.onContractAdded)
+        self._modelDomain.contractUpdated.connect(self.onContractUpdated)
+        self._modelDomain.contractRemoved.connect(self.onContractRemoved)
 
     def clear(self):
         def clearTreeNode(node):
@@ -112,7 +114,7 @@ class ContractModel(QAbstractItemModel):
     #     for n in self.rootNode.childNodes:
     #         for i in mapping[n.data]:
     #             n.appendChild(TreeNode(self._modelDomain.getItemById(i).item_id, n))
-    #
+
     def buildTree(self):
         self.buildFirstLevel(data=self._modelDomain.contractList)
         # self.buildSecondLevel(mapping=self._modelDomain.substMap)
@@ -179,7 +181,7 @@ class ContractModel(QAbstractItemModel):
     # def setData(self, index, value, role):
     #     return True
 
-    def data(self, index: QModelIndex, role=None):
+    def data(self, index: QModelIndex, role=None) -> QVariant:
 
         def getColumnProduct(model, item: ContractItem):
             return "".join([model.productMapModel.getData(r[1]) + " (" + str(r[2]) + " шт.)/" for r in
@@ -365,20 +367,25 @@ class ContractModel(QAbstractItemModel):
     #         f = f & Qt.ItemIsUserCheckable
     #     return f
 
+    def addRow(self, newId: int):
+        self.beginInsertRows(QModelIndex(), self.rootNode.childCount(), self.rootNode.childCount())
+        self.rootNode.appendChild(TreeNode(newId, self.rootNode))
+        self.endInsertRows()
+
     @pyqtSlot(int)
-    def contractAdded(self, newId: int):
+    def onContractAdded(self, conId: int):
         # TODO: if performance issues -- don't rebuild the whole tree, just add inserted item
-        print("device added slot:", newId, self._treeType)
-        self.initModel()
+        print("contract added slot:", conId)
+        self.addRow(conId)
+        # self.initModel()
 
     @pyqtSlot(int)
-    def contractUpdated(self, devId: int):
-        print("device updated slot:", devId)
-        self.treeType = self._treeType
+    def onContractUpdated(self, conId: int):
+        print("device updated slot:", conId)
 
     @pyqtSlot(int)
-    def contractRemoved(self, devId: int):
-        print("device removed slot:", devId)
+    def onContractRemoved(self, conId: int):
+        print("device removed slot:", conId)
         self.treeType = self._treeType
 
     # @property

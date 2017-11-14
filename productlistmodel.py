@@ -1,7 +1,6 @@
 import const
-import datetime
-import isoweek
 from domainmodel import DomainModel
+from collections import defaultdict
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot
 from PyQt5.QtGui import QBrush, QColor
 
@@ -87,6 +86,16 @@ class ProductListModel(QAbstractTableModel):
             return QVariant(self._productList[row][1])
 
         return QVariant()
+
+    def getProductList(self) -> list:
+        if not self._productList:
+            return list()
+
+        d = defaultdict(list)
+        for r in self._productList:
+            d[r[1]] += r[2]
+
+        return [[self._productList[0][0], k, v] for k, v in d.items()]
 
     def flags(self, index):
         f = super(ProductListModel, self).flags(index)

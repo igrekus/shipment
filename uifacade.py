@@ -61,47 +61,43 @@ class UiFacade(QObject):
             return
 
         newItem, products = dialog.getData()
-        print(newItem)
-        print(products)
-        # self._domainModel.addDeviceItem(newItem, mapping)
+
+        self._domainModel.addContractItem(newItem, products)
 
     def requestContractEdit(self, index: QModelIndex):
         item: ContractItem = self._domainModel.getItemById(index.data(const.RoleNodeId))
         print("ui facade edit device request", item)
 
         oldProducts = self._domainModel.contractDetailList[item.item_id]
+
         dialog = DlgContractData(domainModel=self._domainModel, item=item,
                                  products=oldProducts)
 
         if dialog.exec() != QDialog.Accepted:
             return
 
-        newItem, newProducts = dialog.getData()
+        updatedItem, updatedProducts = dialog.getData()
 
-        added, changed, deleted = self.findDiffBetweenProductLists(oldProducts, newProducts)
+        added, changed, deleted = self.findDiffBetweenProductLists(oldProducts, updatedProducts)
 
-        print(changed)
+        print(oldProducts)
+        print(updatedProducts)
         print(added)
+        print(changed)
         print(deleted)
-        # item, mapping = dialog.getData()
-        # self._domainModel.updateDeviceItem(item, mapping)
+        self._domainModel.updateContractItem(item, updatedProducts, (added, changed, deleted))
 
-    # def requestDeviceDelete(self, index: QModelIndex):
-    #     item = self._domainModel.getItemById(index.data(const.RoleNodeId))
-    #     print("ui facade delete device request", item)
-    #     result = QMessageBox.question(self.parent(), "Внимание!",
-    #                                   "Вы хотите удалить выбранную запись?")
-    #
-    #     if result != QMessageBox.Yes:
-    #         return
-    #
-    #     self._domainModel.deleteDeviceItem(item)
-    #
-    # def requestDictEditorOpen(self):
-    #     print("ui facade dict editor open request")
-    #     dialog = DictEditor(domainModel=self._domainModel)
-    #
-    #     dialog.exec()
+    def requestContractDelete(self, index: QModelIndex):
+        item = self._domainModel.getItemById(index.data(const.RoleNodeId))
+        print("ui facade delete contract request", item)
+
+        result = QMessageBox.question(self.parent(), "Внимание!",
+                                      "Вы хотите удалить выбранную запись?")
+
+        if result != QMessageBox.Yes:
+            return
+
+        self._domainModel.deleteContractItem(item)
 
     # def requestExit(self, index):
     #     # TODO make settings class if needed, only current week is saved for now

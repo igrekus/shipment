@@ -4,6 +4,7 @@ import datetime
 from copy import deepcopy
 from comboboxdelegate import ComboBoxDelegate
 from contractitem import ContractItem
+from mapmodel import MapModel
 from productlistmodel import ProductListModel
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QMessageBox, QTableView
@@ -177,6 +178,7 @@ class DlgContractData(QDialog):
                     QMessageBox.information(self, "Ошибка", "Выберите товар из списка.")
                     return False
 
+            # TODO reject dupes in product list
         return True
 
     def collectData(self):
@@ -189,7 +191,6 @@ class DlgContractData(QDialog):
             completed = self._currentItem.item_completed
 
         # TODO: change date formats
-
         self.newItem = ContractItem(id_=id_,
                                     index=self.ui.editIndex.text(),
                                     clientRef=self.ui.comboClient.currentData(const.RoleNodeId),
@@ -239,6 +240,7 @@ class DlgContractData(QDialog):
                                     manufPlanDate=datetime.datetime.strptime(
                                         self.ui.dateManufPlan.date().toString("yyyy-MM-dd"), "%Y-%m-%d"))
 
+        self._productList = self._productModel.getProductList()
 
     def getData(self):
         return self.newItem, self._productList

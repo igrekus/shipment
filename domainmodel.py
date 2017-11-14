@@ -42,56 +42,31 @@ class DomainModel(QObject):
     def getItemById(self, id_):
         return self.contractList[id_]
 
-    # def getVendorById(self, id_):
-    #     """
-    #     :param id_: int
-    #     :return: list(name: str, origin: int)
-    #     """
-    #     return self.vendorList[id_]
-
-    # def getDevtypeById(self, id_):
-    #     return self.devtypeList[id_]
-
-    def addContractItem(self, item: ContractItem, mapping: set):
+    def addContractItem(self, item: ContractItem, products: list):
         print("domain model add contract item call:", item)
-        # newId = self._persistenceFacade.insertDeviceItem(item, mapping)
-        # item.item_id = newId
-        #
-        # self.deviceList[newId] = item
-        #
-        # self.substMap[newId] = mapping
-        # for m in mapping:
-        #     self.substMap[m].add(newId)
-        #
-        # self.deviceMapModel.addItem(newId, item.item_name)
-        #
-        # self.deviceAdded.emit(newId)
+        print("products:", products)
 
-    def updateContractItem(self, item: ContractItem, mapping: set):
+        newItem, newDetaiList = self._persistenceFacade.insertContractItem(item, products)
+
+        self.contractList[newItem.item_id] = newItem
+        self.contractDetailList[newItem.item_id] = newDetaiList
+
+        self.contractAdded.emit(newItem.item_id)
+
+    def updateContractItem(self, item: ContractItem, products: list, updates: list):
         print("domain model update contract item call:", item)
+        print("products", products)
 
-        # self.deviceList[item.item_id] = item
-        #
-        # self.substMap[item.item_id] = mapping
-        # affected_maps = dict()
-        # affected_maps[item.item_id] = self.substMap[item.item_id]
-        # for k, v in self.substMap.items():
-        #     if item.item_id in v and item.item_id not in mapping:
-        #         v.remove(item.item_id)
-        #         affected_maps[k] = v
-        # for m in mapping:
-        #     self.substMap[m].add(item.item_id)
-        #     affected_maps[m] = self.substMap[m]
-        #
-        # self._persistenceFacade.updateDeviceItem(item, affected_maps)
-        #
-        # self.deviceMapModel.updateItem(item.item_id, item.item_name)
-        #
-        # self.deviceUpdated.emit(item.item_id)
+        self.contractList[item.item_id] = item
+        self.contractDetailList[item.item_id] = products
+
+        self._persistenceFacade.updateContractItem(item, updates)
+
+        self.contractUpdated.emit(item.item_id)
 
     def deleteContractItem(self, item: ContractItem):
         print("domain model delete contract item call:", item)
-
+        print("deleting bound products")
         # self.deviceList.pop(item.item_id, 0)
         # self.substMap.pop(item.item_id, 0)
         #
