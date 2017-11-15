@@ -1,7 +1,6 @@
 import const
-import datetime
-import isoweek
 from domainmodel import DomainModel
+from collections import defaultdict
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot
 from PyQt5.QtGui import QBrush, QColor
 
@@ -26,6 +25,8 @@ class ProductListModel(QAbstractTableModel):
 
     def initModel(self, products: list):
         print("init product list model")
+        if products is None:
+            return
         count = len(products) - 1
         if count < 0:
             count = 0
@@ -38,7 +39,7 @@ class ProductListModel(QAbstractTableModel):
             return QVariant(self._header[section])
         return QVariant()
 
-    def rowCount(self, parent=None, *args, **kwargs):
+    def rowCount(self, parent=QModelIndex(), *args, **kwargs):
         if parent.isValid():
             return 0
         return len(self._productList)
@@ -86,15 +87,29 @@ class ProductListModel(QAbstractTableModel):
 
         return QVariant()
 
+    def getProductList(self) -> list:
+        if not self._productList:
+            return list()
+
+        d = defaultdict(list)
+        for r in self._productList:
+            d[r[1]] += r[2]
+
+        return [[self._productList[0][0], k, v] for k, v in d.items()]
+
     def flags(self, index):
         f = super(ProductListModel, self).flags(index)
         return f | Qt.ItemIsEditable
 
-    def addRow(self, id_):
+    def addProduct(self, id_):
         self.beginInsertRows(QModelIndex(), len(self._productList), len(self._productList))
         self._productList.append([0, id_, 0])
         self.endInsertRows()
 
+    def removeProduct(self, row: int):
+        self.beginRemoveRows(QModelIndex(), row, row)
+        del self._productList[row]
+        self.endRemoveRows()
     # @pyqtSlot(int, int)
     # def planItemsBeginInsert(self, first: int, last: int):
     #     self.beginInsertRows(QModelIndex(), first, last)

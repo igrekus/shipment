@@ -193,11 +193,10 @@ class MainWindow(QMainWindow):
         self._uiFacade.requestContractEdit(self._modelSearchProxy.mapToSource(selectedIndex))
 
     def procActContractDelete(self):
-        print("delete contract")
-        # if not self.ui.treeDeviceList.selectionModel().hasSelection():
-        #     QMessageBox.information(self, "Ошибка!", "Выберите запись о приборе для удаления.")
-        #     return False
-        #
-        # selectedIndex = self.ui.treeDeviceList.selectionModel().selectedIndexes()[0]
-        # self._uiFacade.requestDeviceDelete(self._modelSearchProxy.mapToSource(selectedIndex))
+        if not self.ui.treeContract.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка!", "Выберите запись о контракте для удаления.")
+            return False
+
+        selectedIndex = self.ui.treeContract.selectionModel().selectedIndexes()[0]
+        self._uiFacade.requestContractDelete(self._modelSearchProxy.mapToSource(selectedIndex))
 

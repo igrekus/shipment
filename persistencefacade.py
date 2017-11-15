@@ -42,27 +42,25 @@ class PersistenceFacade(QObject):
     #
     # def getDevtypeDict(self):
     #     return {v[0]: v[1] for v in self._engine.fetchDevtypeList()}
-    #
-    # def insertDeviceItem(self, item: DeviceItem, mapping: set):
-    #     print("persistence facade insert device item call:", item, mapping)
-    #     string = str()
-    #     for m in mapping:
-    #         string += str(m) + ","
-    #
-    #     newId = self._engine.insertDeviceRecord(item.toTuple(), string.strip(","))
-    #
-    #     update_list = list()
-    #     for m in mapping:
-    #         update_list.append((m, "," + str(newId), ))
-    #
-    #     self._engine.appendDeviceMapping(update_list)
-    #     return newId
-    #
-    # def updateDeviceItem(self, item: DeviceItem, affected_maps: dict):
-    #     print("persistence facade update device item call:", item)
-    #     self._engine.updateDeviceRecord(item.toTuple())
-    #     self.updateAffectedMaps(affected_maps)
-    #
+
+    def insertContractItem(self, item: ContractItem, products: list):
+        print("persistence facade insert device item call:", item, products)
+
+        newContractId = self._engine.insertMainDataRecord(item.toTuple())
+        newDetailIdList = self._engine.insertContractDetail(products)
+
+        item.item_id = newContractId
+
+        newDetailList = [[i, d[1], d[2]] for i, d in zip(newDetailIdList, products)]
+
+        return item, newDetailList
+
+    def updateContractItem(self, item: ContractItem, updates: list):
+        print("persistence facade update device item call:", item)
+        print("products", updates)
+        # self._engine.updateDeviceRecord(item.toTuple())
+        # self.updateAffectedMaps(affected_maps)
+
     # def updateAffectedMaps(self, maps: dict):
     #     print("persistence facade update affected maps call:", maps)
     #     tmplist = list()

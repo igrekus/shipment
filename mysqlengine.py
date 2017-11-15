@@ -1,8 +1,6 @@
 import pymysql
 from PyQt5.QtCore import QObject
 
-from contractitem import ContractItem
-
 
 class MysqlEngine(QObject):
     def __init__(self, parent=None, dbItemClass=None):
@@ -83,30 +81,34 @@ class MysqlEngine(QObject):
         # TODO make dict ORM
         return self.execSimpleQuery("CALL get" + name + "List()").fetchall()
 
+    def insertMainDataRecord(self, data):
+        # TODO: construct parameter list by number of data items
+        q = "CALL insertMainData(%s, %s, %s, %s, %s, %s, %s)"
+        print(q, data[:-1])
+
+        # cursor = self.execParametrizedQuery(q, data[:-1])
+        # rec_id = cursor.fetchone()[0]
+        rec_id = 1000
+
+        return rec_id
+
     # domain-specific methods
     def fetchContractDetailList(self):
         return self.execSimpleQuery("CALL getContractDetailList()").fetchall()
+
+    def insertContractDetail(self, data: list) -> list:
+        q = "CALL insertContractDetail(%s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, (rec_id, mapping, ))
+
+        return [1111] * len(data)
 
     # def fetchVendorList(self):
     #     return self.execSimpleQuery("CAll getVendorList()").fetchall()
     #
     # def fetchDevtypeList(self):
     #     return self.execSimpleQuery("CALL getDevtypeList()").fetchall()
-    #
-    # def insertDeviceRecord(self, data, mapping):
-    #     print("mysql engine insert device record:", data, mapping)
-    #
-    #     q = "CALL insertDevice(%s, %s, %s, %s, %s, %s, %s)"
-    #     # print(q, data[:-1])
-    #     cursor = self.execParametrizedQuery(q, data[:-1])
-    #     rec_id = cursor.fetchone()[0]
-    #
-    #     q = "CALL insertMapping(%s, %s)"
-    #     # print(q, (rec_id, mapping,))
-    #     self.execParametrizedQuery(q, (rec_id, mapping, ))
-    #
-    #     return rec_id
-    #
+
     # def appendDeviceMapping(self, mappings):
     #     q = "CALL appendDeviceMapping(%s, %s)"
     #     for m in mappings:
