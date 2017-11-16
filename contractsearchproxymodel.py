@@ -3,12 +3,11 @@ import re
 from PyQt5.QtCore import QSortFilterProxyModel, QDate, Qt
 
 
-class DeviceSearchProxyModel(QSortFilterProxyModel):
+class ContractSearchProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
-        super(DeviceSearchProxyModel, self).__init__(parent)
+        super(ContractSearchProxyModel, self).__init__(parent)
 
-        self.filterVendor = 0
-        self.filterDevtype = 0
+        self.filterClient = 0
         self._filterString = ""
         self._filterRegex = re.compile(self._filterString, flags=re.IGNORECASE)
 
@@ -25,14 +24,12 @@ class DeviceSearchProxyModel(QSortFilterProxyModel):
             raise TypeError("Filter must be a str.")
 
     def filterAcceptsSelf(self, row, parent_index):
-        vendor = self.sourceModel().index(row, 0, parent_index).data(const.RoleVendor)
-        devtype = self.sourceModel().index(row, 0, parent_index).data(const.RoleDevtype)
-        if self.filterVendor == 0 or self.filterVendor == vendor:
-            if self.filterDevtype == 0 or self.filterDevtype == devtype:
-                for i in range(self.sourceModel().columnCount()):
-                    string = str(self.sourceModel().index(row, i, parent_index).data(Qt.DisplayRole))
-                    if self._filterRegex.findall(string):
-                        return True
+        client = self.sourceModel().index(row, 0, parent_index).data(const.RoleClient)
+        if self.filterClient == 0 or self.filterClient == client:
+            for i in range(self.sourceModel().columnCount()):
+                string = str(self.sourceModel().index(row, i, parent_index).data(Qt.DisplayRole))
+                if self._filterRegex.findall(string):
+                    return True
         return False
 
     def filterAcceptsAnyParent(self, parent_index):

@@ -71,7 +71,7 @@ class UiFacade(QObject):
         oldProducts = self._domainModel.contractDetailList[item.item_id]
 
         dialog = DlgContractData(domainModel=self._domainModel, item=item,
-                                 products=oldProducts)
+                                         products=oldProducts)
 
         if dialog.exec() != QDialog.Accepted:
             return
@@ -80,12 +80,7 @@ class UiFacade(QObject):
 
         added, changed, deleted = self.findDiffBetweenProductLists(oldProducts, updatedProducts)
 
-        print(oldProducts)
-        print(updatedProducts)
-        print(added)
-        print(changed)
-        print(deleted)
-        self._domainModel.updateContractItem(item, updatedProducts, (added, changed, deleted))
+        self._domainModel.updateContractItem(updatedItem, updatedProducts, (added, changed, deleted))
 
     def requestContractDelete(self, index: QModelIndex):
         item = self._domainModel.getItemById(index.data(const.RoleNodeId))

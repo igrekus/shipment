@@ -1,8 +1,6 @@
 from collections import defaultdict
-
 from mapmodel import MapModel
 from PyQt5.QtCore import QObject
-
 from contractitem import ContractItem
 
 
@@ -44,7 +42,7 @@ class PersistenceFacade(QObject):
     #     return {v[0]: v[1] for v in self._engine.fetchDevtypeList()}
 
     def insertContractItem(self, item: ContractItem, products: list):
-        print("persistence facade insert device item call:", item, products)
+        print("persistence facade insert contract item call:", item, products)
 
         newContractId = self._engine.insertMainDataRecord(item.toTuple())
         newDetailIdList = self._engine.insertContractDetail(products)
@@ -56,27 +54,28 @@ class PersistenceFacade(QObject):
         return item, newDetailList
 
     def updateContractItem(self, item: ContractItem, updates: list):
-        print("persistence facade update device item call:", item)
+        print("persistence facade update contract item call:", item)
         print("products", updates)
-        # self._engine.updateDeviceRecord(item.toTuple())
-        # self.updateAffectedMaps(affected_maps)
 
-    # def updateAffectedMaps(self, maps: dict):
-    #     print("persistence facade update affected maps call:", maps)
-    #     tmplist = list()
-    #     for k, v in maps.items():
-    #         string = str()
-    #         for i in v:
-    #             string += str(i) + ","
-    #         tmplist.append((k, string.strip(","), ))
-    #
-    #     self._engine.updateDeviceMappings(tmplist)
-    #
-    # def deleteDeviceItem(self, item: DeviceItem, affected_maps: dict):
-    #     print("persistence facade delete item call:", item)
-    #     self._engine.deleteDeviceRecord(item.toTuple())
-    #     self.updateAffectedMaps(affected_maps)
-    #
+        self._engine.updateMainDataRecord(item.toTuple())
+
+        self.updateContractDetail(updates)
+
+    def deleteContractItem(self, item: ContractItem):
+        print("persistence facade delete contract item call:", item)
+        self._engine.deleteMainDataRecord(item.toTuple())
+        self._engine.deleteContractDetail([item.item_id])
+
+    def updateContractDetail(self, updates: list):
+        print("persistence facade update contract detail call:", updates)
+        # TODO: prepare data for queries here
+        if updates[0]:
+            self._engine.insertContractDetail(updates[0])
+        if updates[1]:
+            self._engine.updateContractDetail(updates[1])
+        if updates[2]:
+            self._engine.deleteContractDetail(updates[2])
+
     # def addVendorRecord(self, data: list):
     #     print("persistence facade add vendor record:", data)
     #     return self._engine.insertVendorRecord(data)

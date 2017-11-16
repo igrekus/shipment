@@ -16,6 +16,27 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLineEdit" name="editSearchFilter">
+        <property name="placeholderText">
+         <string>Поиск...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblClientFilter">
+        <property name="text">
+         <string>Заказчик:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboClientFilter"/>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QTreeView" name="treeContract">
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>

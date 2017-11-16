@@ -56,6 +56,7 @@ class DomainModel(QObject):
     def updateContractItem(self, item: ContractItem, products: list, updates: list):
         print("domain model update contract item call:", item)
         print("products", products)
+        print("updates", updates)
 
         self.contractList[item.item_id] = item
         self.contractDetailList[item.item_id] = products
@@ -67,20 +68,13 @@ class DomainModel(QObject):
     def deleteContractItem(self, item: ContractItem):
         print("domain model delete contract item call:", item)
         print("deleting bound products")
-        # self.deviceList.pop(item.item_id, 0)
-        # self.substMap.pop(item.item_id, 0)
-        #
-        # affected_maps = dict()
-        # for k, v in self.substMap.items():
-        #     if item.item_id in v:
-        #         v.remove(item.item_id)
-        #         affected_maps[k] = v
-        #
-        # self._persistenceFacade.deleteDeviceItem(item, affected_maps)
-        #
-        # self.deviceMapModel.removeItem(item.item_id)
-        #
-        # self.deviceRemoved.emit(item.item_id)
+
+        self.contractList.pop(item.item_id, 0)
+        self.contractDetailList.pop(item.item_id, 0)
+
+        self._persistenceFacade.deleteContractItem(item)
+
+        self.contractRemoved.emit(item.item_id)
 
     # def addVendorRecord(self, data):
     #     print("domain model add vendor record call", data)

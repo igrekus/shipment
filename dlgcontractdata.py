@@ -68,7 +68,7 @@ class DlgContractData(QDialog):
             if isinstance(date, datetime.date):
                 return QDate().fromString(date.isoformat(), "yyyy-MM-dd")
             else:
-                return QDate.currentDate()
+                return QDate().fromString("2000-01-01", "yyyy-MM-dd")
 
         self.ui.editIndex.setText(self._currentItem.item_index)
         self.ui.comboClient.setCurrentText(self._domainModel.clientMapModel.getData(self._currentItem.item_clientRef))
@@ -173,6 +173,12 @@ class DlgContractData(QDialog):
             QMessageBox.information(self, "Ошибка", "Добавьте товары в список.")
             return False
         else:
+            ids = self._productModel.getProductIdList()
+            if len(ids) > len(set(ids)):
+                QMessageBox.information(self, "Ошибка", "Товары в списке не должны повторяться.")
+                return False
+
+            # TODO: move to the model
             for i in range(self._productModel.rowCount()):
                 if self._productModel.data(self._productModel.index(i, 0, QModelIndex()), Qt.DisplayRole).value() == "Все":
                     QMessageBox.information(self, "Ошибка", "Выберите товар из списка.")
@@ -182,6 +188,10 @@ class DlgContractData(QDialog):
         return True
 
     def collectData(self):
+
+        def getDate(strdate):
+            return str
+
         id_ = None
         if self._currentItem is not None:
             id_ = self._currentItem.item_id
@@ -197,44 +207,44 @@ class DlgContractData(QDialog):
                                     projCode=self.ui.editProject.text(),
                                     requestN=self.ui.editRequestN.text(),
                                     requestDate=datetime.datetime.strptime(
-                                        self.ui.dateRequest.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateRequest.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     dogozName=self.ui.dateDogoz.text(),
                                     dogozDate=datetime.datetime.strptime(
-                                        self.ui.dateDogoz.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateDogoz.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     deviceRequestN=self.ui.editDevRequestN.text(),
                                     deviceRequestCode=self.ui.editDevRequestCode.text(),
                                     contractN=self.ui.editContractN.text(),
                                     contractDate=datetime.datetime.strptime(
-                                        self.ui.dateContract.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateContract.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     specReturnDate=datetime.datetime.strptime(
-                                        self.ui.dateSpecReturn.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateSpecReturn.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     sum=int(self.ui.spinSum.value() * 100),
                                     billNumber=self.ui.editBillN.text(),
                                     billDate=datetime.datetime.strptime(self.ui.dateBill.date().toString("yyyy-MM-dd"),
-                                                                        "%Y-%m-%d"),
+                                                                        "%Y-%m-%d").date(),
                                     milDate=datetime.datetime.strptime(self.ui.dateMil.date().toString("yyyy-MM-dd"),
-                                                                       "%Y-%m-%d"),
+                                                                       "%Y-%m-%d").date(),
                                     addLetterDate=datetime.datetime.strptime(
-                                        self.ui.dateAddLetter.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateAddLetter.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     responseDate=datetime.datetime.strptime(
-                                        self.ui.dateResponse.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateResponse.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     paymentOrderN=self.ui.editPaymentN.text(),
                                     paymentDate=datetime.datetime.strptime(
-                                        self.ui.datePayment.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.datePayment.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     matPurchaseDate=datetime.datetime.strptime(
-                                        self.ui.dateMatPurchase.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateMatPurchase.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     planShipmentDate=datetime.datetime.strptime(
-                                        self.ui.datePlanShip.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.datePlanShip.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     shipmentPeriod=self.ui.spinShipPeriod.value(),
                                     invoiceN=self.ui.editInvoiceN.text(),
                                     invoiceDate=datetime.datetime.strptime(
-                                        self.ui.dateInvoice.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateInvoice.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     packingListN=self.ui.editPacklistN.text(),
                                     packingListDate=datetime.datetime.strptime(
-                                        self.ui.datePacklist.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.datePacklist.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     shipNote=self.ui.editShipNote.text(),
                                     shipDate=datetime.datetime.strptime(self.ui.dateShip.date().toString("yyyy-MM-dd"),
-                                                                        "%Y-%m-%d"),
+                                                                        "%Y-%m-%d").date(),
                                     completed=completed,
                                     contacts=self.ui.textContact.toPlainText(),
                                     manufPlanDate=datetime.datetime.strptime(
@@ -248,7 +258,6 @@ class DlgContractData(QDialog):
     def onBtnOkClicked(self):
         if not self.verifyInputData():
             return
-
         self.collectData()
         self.accept()
 

@@ -24,7 +24,7 @@ class ProductListModel(QAbstractTableModel):
         self.endResetModel()
 
     def initModel(self, products: list):
-        print("init product list model")
+        # print("init product list model")
         if products is None:
             return
         count = len(products) - 1
@@ -91,11 +91,10 @@ class ProductListModel(QAbstractTableModel):
         if not self._productList:
             return list()
 
-        d = defaultdict(list)
-        for r in self._productList:
-            d[r[1]] += r[2]
+        return self._productList
 
-        return [[self._productList[0][0], k, v] for k, v in d.items()]
+    def getProductIdList(self) -> list:
+        return [p[1] for p in self._productList]
 
     def flags(self, index):
         f = super(ProductListModel, self).flags(index)

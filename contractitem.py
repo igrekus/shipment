@@ -1,5 +1,4 @@
-from datetime import date, datetime
-
+import datetime
 import const
 
 
@@ -18,7 +17,7 @@ class ContractItem:
         self.item_clientRef = clientRef
         self.item_projCode = projCode
         self.item_requestN = requestN
-        self.item_requestDate: datetime = requestDate
+        self.item_requestDate = requestDate
         self.item_dogozName = dogozName
         self.item_dogozDate = dogozDate
         self.item_deviceRequestN = deviceRequestN
@@ -119,38 +118,43 @@ class ContractItem:
                    manufPlanDate=sql_tuple[32])
 
     def toTuple(self):
+        def formatDate(indate):
+            if isinstance(indate, datetime.date):
+                return indate.isoformat()
+            return "2000-01-01"
+
         return tuple([self.item_index,
                       self.item_clientRef,
                       self.item_projCode,
                       self.item_requestN,
-                      self.item_requestDate.date().isoformat(),
+                      formatDate(self.item_requestDate),
                       self.item_dogozName,
-                      self.item_dogozDate.date().isoformat(),
+                      formatDate(self.item_dogozDate),
                       self.item_deviceRequestN,
                       self.item_deviceRequestCode,
                       self.item_contractN,
-                      self.item_contractDate.date().isoformat(),
-                      self.item_specReturnDate.date().isoformat(),
+                      formatDate(self.item_contractDate),
+                      formatDate(self.item_specReturnDate),
                       self.item_sum,
                       self.item_billNumber,
-                      self.item_billDate.date().isoformat(),
-                      self.item_milDate.date().isoformat(),
-                      self.item_addLetterDate.date().isoformat(),
-                      self.item_responseDate.date().isoformat(),
+                      formatDate(self.item_billDate),
+                      formatDate(self.item_milDate),
+                      formatDate(self.item_addLetterDate),
+                      formatDate(self.item_responseDate),
                       self.item_paymentOrderN,
-                      self.item_paymentDate.date().isoformat(),
-                      self.item_matPurchaseDate.date().isoformat(),
-                      self.item_planShipmentDate.date().isoformat(),
+                      formatDate(self.item_paymentDate),
+                      formatDate(self.item_matPurchaseDate),
+                      formatDate(self.item_planShipmentDate),
                       self.item_shipmentPeriod,
                       self.item_invoiceN,
-                      self.item_invoiceDate.date().isoformat(),
+                      formatDate(self.item_invoiceDate),
                       self.item_packingListN,
-                      self.item_packingListDate.date().isoformat(),
+                      formatDate(self.item_packingListDate),
                       self.item_shipNote,
-                      self.item_shipDate.date().isoformat(),
-                      self.item_completed,
+                      formatDate(self.item_shipDate),
+                      int(self.item_completed),
                       self.item_contacts,
-                      self.item_manufPlanDate.date().isoformat(),
+                      formatDate(self.item_manufPlanDate),
                       self.item_id])
 
     @classmethod

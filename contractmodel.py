@@ -28,6 +28,11 @@ class TreeNode(object):
             return self.parentNode.childItems.index(self)
         return 0
 
+    def findChild(self, data):
+        for i in range(len(self.childNodes)):
+            if self.childNodes[i].data == data:
+                return i
+
     def __str__(self):
         return "TreeNode(data:" + str(self.data) + " parent:" + str(id(self.parentNode)) + " children:" + str(
             len(self.childNodes)) + ")"
@@ -385,8 +390,11 @@ class ContractModel(QAbstractItemModel):
 
     @pyqtSlot(int)
     def onContractRemoved(self, conId: int):
-        print("device removed slot:", conId)
-        self.treeType = self._treeType
+        print("device removed slot:", conId, "row:")
+        row = self.rootNode.findChild(conId)
+        self.beginRemoveRows(QModelIndex(), row, row)
+        self.rootNode.childNodes.pop(row)
+        self.endRemoveRows()
 
     # @property
     # def treeType(self):

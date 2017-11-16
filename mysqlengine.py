@@ -85,12 +85,20 @@ class MysqlEngine(QObject):
         # TODO: construct parameter list by number of data items
         q = "CALL insertMainData(%s, %s, %s, %s, %s, %s, %s)"
         print(q, data[:-1])
-
         # cursor = self.execParametrizedQuery(q, data[:-1])
         # rec_id = cursor.fetchone()[0]
         rec_id = 1000
-
         return rec_id
+
+    def updateMainDataRecord(self, data):
+        q = "CALL updateMainData(%s, %s, %s, %s, %s, %s, %s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, data)
+
+    def deleteMainDataRecord(self, data):
+        q = "CALL deleteMainData(%s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, data)
 
     # domain-specific methods
     def fetchContractDetailList(self):
@@ -100,8 +108,17 @@ class MysqlEngine(QObject):
         q = "CALL insertContractDetail(%s, %s)"
         print(q, data)
         # self.execParametrizedQuery(q, (rec_id, mapping, ))
-
         return [1111] * len(data)
+
+    def updateContractDetail(self, data: list):
+        q = "CALL updateContractDetail(%s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, (rec_id, mapping, ))
+
+    def deleteContractDetail(self, data: list):
+        q = "CALL deleteContractDetail(%s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, (rec_id, mapping, ))
 
     # def fetchVendorList(self):
     #     return self.execSimpleQuery("CAll getVendorList()").fetchall()
@@ -113,12 +130,7 @@ class MysqlEngine(QObject):
     #     q = "CALL appendDeviceMapping(%s, %s)"
     #     for m in mappings:
     #         self.execParametrizedQuery(q, m)
-    #
-    # def updateDeviceRecord(self, item):
-    #     print("mysql engine update device:", item)
-    #     q = "CALL updateDevice(%s, %s, %s, %s, %s, %s, %s, %s)"
-    #     self.execParametrizedQuery(q, item)
-    #
+
     # def updateDeviceMappings(self, mappings):
     #     print("mysql engine update device mappings:", mappings)
     #     q = "CALL updateDeviceMapping(%s, %s)"
