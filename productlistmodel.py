@@ -66,7 +66,7 @@ class ProductListModel(QAbstractTableModel):
 
         if role == Qt.DisplayRole or role == Qt.ToolTipRole:
             if col == self.ColumnName:
-                return QVariant(self._modelDomain.productMapModel.getData(self._productList[row][1]))
+                return QVariant(self._modelDomain.dicts[const.DICT_PRODUCT].getData(self._productList[row][1]))
             elif col == self.ColumnAmount:
                 return QVariant(str(self._productList[row][2]) + " шт.")
 

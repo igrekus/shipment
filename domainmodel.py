@@ -1,12 +1,10 @@
-from collections import defaultdict
+import const
 from contractitem import ContractItem
 from mapmodel import MapModel
-from PyQt5.QtCore import QObject, QModelIndex, pyqtSignal, QDate
+from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class DomainModel(QObject):
-
-    dict_list = ["client", "product"]
 
     contractAdded = pyqtSignal(int)
     contractUpdated = pyqtSignal(int)
@@ -19,25 +17,23 @@ class DomainModel(QObject):
 
         self.contractList = dict()
         self.contractDetailList = dict()
+        self.dicts = dict()
 
         self.clientMapModel: MapModel = None
         self.productMapModel: MapModel = None
 
-    def buildClientMapModel(self):
-        self.clientMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[0]))
+        self.dictList = [const.DICT_CLIENT, const.DICT_PRODUCT]
 
-    def buildProductMapModel(self):
-        self.productMapModel = MapModel(self, self._persistenceFacade.getDict(self.dict_list[1]))
+    def buildMapModel(self, name: str):
+        self.dicts[name] = MapModel(self, self._persistenceFacade.getDict(name))
+        self.dicts[name].addItemAtPosition(0, 0, "Все")
 
     def initModel(self):
         print("init domain model")
         self.contractList = self._persistenceFacade.getContractList()
         self.contractDetailList = self._persistenceFacade.getContractDetailList()
-        self.buildClientMapModel()
-        self.clientMapModel.addItemAtPosition(0, 0, "Все")
-
-        self.buildProductMapModel()
-        self.productMapModel.addItemAtPosition(0, 0, "Все")
+        for name in self.dictList:
+            self.buildMapModel(name)
 
     def getItemById(self, id_):
         return self.contractList[id_]
@@ -76,23 +72,10 @@ class DomainModel(QObject):
 
         self.contractRemoved.emit(item.item_id)
 
-    # def addVendorRecord(self, data):
-    #     print("domain model add vendor record call", data)
-    #     newId = self._persistenceFacade.addVendorRecord(data)
-    #
-    #     self.vendorList[newId] = data[0]
-    #     self.vendorMapModel.addItem(newId, data[0])
-    #
-    #     print(self.vendorList)
-
-    # def addDictRecord(self, dictName, data):
-    #     print("domain model add dict record:", dictName, data)
-    #     newId = self._persistenceFacade.addDictRecord(dictName, data)
-    #
-    #     if dictName == "vendor":
-    #         self.vendorMapModel.addItem(newId, data)
-    #     elif dictName == "devtype":
-    #         self.devtypeMapModel.addItem(newId, data)
+    def addDictRecord(self, name, data):
+        print("domain model add dict record:", name, data)
+        newId = self._persistenceFacade.addDictRecord(name, data)
+        self.dicts[name].addItem(newId, data)
 
     # def editDictRecord(self, dictName, data):
     #     print("domain model edit dict record:", dictName, data)

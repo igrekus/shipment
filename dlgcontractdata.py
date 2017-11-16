@@ -4,7 +4,6 @@ import datetime
 from copy import deepcopy
 from comboboxdelegate import ComboBoxDelegate
 from contractitem import ContractItem
-from mapmodel import MapModel
 from productlistmodel import ProductListModel
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QMessageBox, QTableView
@@ -15,7 +14,7 @@ from spinboxdelegate import SpinBoxDelegate
 
 class DlgContractData(QDialog):
 
-    def __init__(self, parent=None, domainModel=None, item=None, products=None):
+    def __init__(self, parent=None, domainModel=None, uifacade=None, item=None, products=None):
         super(DlgContractData, self).__init__(parent)
 
         self.setAttribute(Qt.WA_QuitOnClose)
@@ -27,6 +26,7 @@ class DlgContractData(QDialog):
 
         # init instances
         self._domainModel = domainModel
+        self._uiFacade = uifacade
 
         # data members
         self._currentItem: ContractItem = item
@@ -43,10 +43,10 @@ class DlgContractData(QDialog):
         # init widgets
         self.ui.tableProduct: QTableView
         self.ui.tableProduct.setItemDelegateForColumn(0, ComboBoxDelegate(parent=self.ui.tableProduct,
-                                                                          mapModel=self._domainModel.productMapModel))
+                                                                          mapModel=self._domainModel.dicts[const.DICT_PRODUCT]))
         self.ui.tableProduct.setItemDelegateForColumn(1, SpinBoxDelegate(parent=self.ui.tableProduct))
 
-        self.ui.comboClient.setModel(self._domainModel.clientMapModel)
+        self.ui.comboClient.setModel(self._domainModel.dicts[const.DICT_CLIENT])
         self.ui.tableProduct.setModel(self._productModel)
         self._productModel.initModel(self._productList)
 
@@ -55,6 +55,7 @@ class DlgContractData(QDialog):
         self.ui.btnClientAdd.clicked.connect(self.onBtnClientAddClicked)
         self.ui.btnProductAdd.clicked.connect(self.onBtnProductAddClicked)
         self.ui.btnProductRemove.clicked.connect(self.onBtnProductRemoveClicked)
+        self.ui.btnNewProduct.clicked.connect(self.onBtnNewProductClicked)
 
         # set widget data
         if self._currentItem is None:
@@ -71,7 +72,7 @@ class DlgContractData(QDialog):
                 return QDate().fromString("2000-01-01", "yyyy-MM-dd")
 
         self.ui.editIndex.setText(self._currentItem.item_index)
-        self.ui.comboClient.setCurrentText(self._domainModel.clientMapModel.getData(self._currentItem.item_clientRef))
+        self.ui.comboClient.setCurrentText(self._domainModel.dicts[const.DICT_CLIENT].getData(self._currentItem.item_clientRef))
         self.ui.editProject.setText(self._currentItem.item_projCode)
         self.ui.editRequestN.setText(self._currentItem.item_requestN)
         self.ui.dateRequest.setDate(formatDate(self._currentItem.item_requestDate))
@@ -189,8 +190,8 @@ class DlgContractData(QDialog):
 
     def collectData(self):
 
-        def getDate(strdate):
-            return str
+        # def getDate(strdate):
+        #     return str
 
         id_ = None
         if self._currentItem is not None:
@@ -262,12 +263,15 @@ class DlgContractData(QDialog):
         self.accept()
 
     def onBtnClientAddClicked(self):
-        print("add client")
+        self._uiFacade.requestClientAdd(caller=self)
 
     def onBtnProductAddClicked(self):
-        self._productModel.addProduct(self._domainModel.productMapModel.getIdByIndex(1))
+        self._productModel.addProduct(self._domainModel.dicts[const.DICT_PRODUCT].getIdByIndex(1))
 
     def onBtnProductRemoveClicked(self):
         if not self.ui.tableProduct.selectionModel().hasSelection():
             return
         self._productModel.removeProduct(self.ui.tableProduct.selectionModel().selectedIndexes()[0].row())
+
+    def onBtnNewProductClicked(self):
+        self._uiFacade.requestProductAdd(caller=self)

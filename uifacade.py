@@ -1,9 +1,6 @@
-from functools import reduce
-
 import const
-from PyQt5.QtCore import QObject, QModelIndex, Qt
-from PyQt5.QtWidgets import QDialog, QMessageBox
-
+from PyQt5.QtCore import QObject, QModelIndex
+from PyQt5.QtWidgets import QDialog, QMessageBox, QInputDialog, QLineEdit
 from contractitem import ContractItem
 from dlgcontractdata import DlgContractData
 
@@ -55,7 +52,8 @@ class UiFacade(QObject):
 
     def requestContractAdd(self):
         print("ui facade add contract request")
-        dialog = DlgContractData(domainModel=self._domainModel, item=None, products=None)  # empty dialog for a new item
+        dialog = DlgContractData(domainModel=self._domainModel, uifacade=self, item=None,
+                                 products=None)  # empty dialog for a new item
 
         if dialog.exec() != QDialog.Accepted:
             return
@@ -70,8 +68,8 @@ class UiFacade(QObject):
 
         oldProducts = self._domainModel.contractDetailList[item.item_id]
 
-        dialog = DlgContractData(domainModel=self._domainModel, item=item,
-                                         products=oldProducts)
+        dialog = DlgContractData(domainModel=self._domainModel, uifacade=self, item=item,
+                                 products=oldProducts)
 
         if dialog.exec() != QDialog.Accepted:
             return
@@ -93,6 +91,26 @@ class UiFacade(QObject):
             return
 
         self._domainModel.deleteContractItem(item)
+
+    def requestClientAdd(self, caller):
+        print("ui facade add client request")
+
+        data, ok = QInputDialog.getText(caller, "Добавить нового клиента", "Введите название:", QLineEdit.Normal, "")
+
+        if not ok:
+            return
+
+        self._domainModel.addDictRecord(const.DICT_CLIENT, data)
+
+    def requestProductAdd(self, caller):
+        print("ui facade add new product request")
+
+        data, ok = QInputDialog.getText(caller, "Добавить новый прибор", "Введите наименование:", QLineEdit.Normal, "")
+
+        if not ok:
+            return
+
+        self._domainModel.addDictRecord(const.DICT_PRODUCT, data)
 
     # def requestExit(self, index):
     #     # TODO make settings class if needed, only current week is saved for now

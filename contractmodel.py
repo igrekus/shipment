@@ -189,7 +189,7 @@ class ContractModel(QAbstractItemModel):
     def data(self, index: QModelIndex, role=None) -> QVariant:
 
         def getColumnProduct(model, item: ContractItem):
-            return "".join([model.productMapModel.getData(r[1]) + " (" + str(r[2]) + " шт.)/" for r in
+            return "".join([model.dicts[const.DICT_PRODUCT].getData(r[1]) + " (" + str(r[2]) + " шт.)/" for r in
                             model.contractDetailList[item.item_id]]).strip("/")
 
         def getColumnPaymentDays(item: ContractItem):
@@ -239,7 +239,7 @@ class ContractModel(QAbstractItemModel):
                     return QVariant("N/A")
                 return QVariant((item.item_paymentDate + datetime.timedelta(days=89)).year)
             elif col == self.ColumnClient:
-                return QVariant(self._modelDomain.clientMapModel.getData(item.item_clientRef))
+                return QVariant(self._modelDomain.dicts[const.DICT_CLIENT].getData(item.item_clientRef))
             elif col == self.ColumnProjectCode:
                 return QVariant(item.item_projCode)
             elif col == self.ColumnProduct:

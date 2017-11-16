@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
         self.ui.treeContract.header().setStretchLastSection(True)
 
         # setup filter widgets
-        self.ui.comboClientFilter.setModel(self._modelDomain.clientMapModel)
+        self.ui.comboClientFilter.setModel(self._modelDomain.dicts[const.DICT_CLIENT])
 
         # create actions
         self.initActions()
