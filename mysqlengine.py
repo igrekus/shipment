@@ -85,12 +85,48 @@ class MysqlEngine(QObject):
         # TODO: construct parameter list by number of data items
         q = "CALL insertMainData(%s, %s, %s, %s, %s, %s, %s)"
         print(q, data[:-1])
-
         # cursor = self.execParametrizedQuery(q, data[:-1])
         # rec_id = cursor.fetchone()[0]
         rec_id = 1000
-
         return rec_id
+
+    def updateMainDataRecord(self, data):
+        q = "CALL updateMainData(%s, %s, %s, %s, %s, %s, %s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, data)
+
+    def deleteMainDataRecord(self, data):
+        q = "CALL deleteMainData(%s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, data)
+
+    def insertDictRecord(self, dictName, data):
+        print("mysql engine insert dict record:", dictName, data)
+        # with self._connection:
+        #     cursor = self._connection.cursor()
+        #     cursor.execute(" INSERT INTO " + dictName +
+        #                    "      (" + dictName + "_id" +
+        #                    "      , " + dictName + "_name" + ")"
+        #                    " VALUES (NULL, %s)", data)
+        #     rec_id = cursor.lastrowid
+        rec_id = 100
+        return rec_id
+
+    def updateDictRecord(self, dictName, data):
+        print("mysql engine update dict record:", dictName, data)
+        # with self._connection:
+        #     cursor = self._connection.cursor()
+        #     cursor.execute(" UPDATE " + dictName +
+        #                    "    SET " + dictName + "_name = %s" +
+        #                    "  WHERE " + dictName + "_id = %s", data)
+
+    def deleteDictRecord(self, dictName, data):
+        print("mysql engine delete dict record:", dictName, data)
+        # with self._connection:
+        #     cursor = self._connection.cursor()
+        #     cursor.execute(" DELETE "
+        #                    "   FROM " + dictName +
+        #                    "  WHERE " + dictName + "_id = %s", data)
 
     # domain-specific methods
     def fetchContractDetailList(self):
@@ -100,8 +136,17 @@ class MysqlEngine(QObject):
         q = "CALL insertContractDetail(%s, %s)"
         print(q, data)
         # self.execParametrizedQuery(q, (rec_id, mapping, ))
-
         return [1111] * len(data)
+
+    def updateContractDetail(self, data: list):
+        q = "CALL updateContractDetail(%s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, (rec_id, mapping, ))
+
+    def deleteContractDetail(self, data: list):
+        q = "CALL deleteContractDetail(%s, %s)"
+        print(q, data)
+        # self.execParametrizedQuery(q, (rec_id, mapping, ))
 
     # def fetchVendorList(self):
     #     return self.execSimpleQuery("CAll getVendorList()").fetchall()
@@ -113,12 +158,7 @@ class MysqlEngine(QObject):
     #     q = "CALL appendDeviceMapping(%s, %s)"
     #     for m in mappings:
     #         self.execParametrizedQuery(q, m)
-    #
-    # def updateDeviceRecord(self, item):
-    #     print("mysql engine update device:", item)
-    #     q = "CALL updateDevice(%s, %s, %s, %s, %s, %s, %s, %s)"
-    #     self.execParametrizedQuery(q, item)
-    #
+
     # def updateDeviceMappings(self, mappings):
     #     print("mysql engine update device mappings:", mappings)
     #     q = "CALL updateDeviceMapping(%s, %s)"
@@ -137,34 +177,7 @@ class MysqlEngine(QObject):
     #     cursor = self.execParametrizedQuery(q, data)
     #     rec_id = cursor.fetchone()[0]
     #     return rec_id
-    #
-    # def insertDictRecord(self, dictName, data):
-    #     print("mysql engine insert dict record:", dictName, data)
-    #     with self._connection:
-    #         cursor = self._connection.cursor()
-    #         cursor.execute(" INSERT INTO " + dictName +
-    #                        "      (" + dictName + "_id" +
-    #                        "      , " + dictName + "_name" + ")"
-    #                        " VALUES (NULL, %s)", data)
-    #         rec_id = cursor.lastrowid
-    #     return rec_id
-    #
-    # def updateDictRecord(self, dictName, data):
-    #     print("mysql engine update dict record:", dictName, data)
-    #     with self._connection:
-    #         cursor = self._connection.cursor()
-    #         cursor.execute(" UPDATE " + dictName +
-    #                        "    SET " + dictName + "_name = %s" +
-    #                        "  WHERE " + dictName + "_id = %s", data)
-    #
-    # def deleteDictRecord(self, dictName, data):
-    #     print("mysql engine delete dict record:", dictName, data)
-    #     with self._connection:
-    #         cursor = self._connection.cursor()
-    #         cursor.execute(" DELETE "
-    #                        "   FROM " + dictName +
-    #                        "  WHERE " + dictName + "_id = %s", data)
-    #
+
     # def checkDictRef(self, dictName, data):
     #     print("mysql engine check dict reference:", dictName, data)
     #     q = "CALL check" + dictName + "Ref(%s)"

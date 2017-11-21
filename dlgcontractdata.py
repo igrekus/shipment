@@ -4,7 +4,6 @@ import datetime
 from copy import deepcopy
 from comboboxdelegate import ComboBoxDelegate
 from contractitem import ContractItem
-from mapmodel import MapModel
 from productlistmodel import ProductListModel
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QMessageBox, QTableView
@@ -15,7 +14,7 @@ from spinboxdelegate import SpinBoxDelegate
 
 class DlgContractData(QDialog):
 
-    def __init__(self, parent=None, domainModel=None, item=None, products=None):
+    def __init__(self, parent=None, domainModel=None, uifacade=None, item=None, products=None):
         super(DlgContractData, self).__init__(parent)
 
         self.setAttribute(Qt.WA_QuitOnClose)
@@ -27,6 +26,7 @@ class DlgContractData(QDialog):
 
         # init instances
         self._domainModel = domainModel
+        self._uiFacade = uifacade
 
         # data members
         self._currentItem: ContractItem = item
@@ -43,10 +43,10 @@ class DlgContractData(QDialog):
         # init widgets
         self.ui.tableProduct: QTableView
         self.ui.tableProduct.setItemDelegateForColumn(0, ComboBoxDelegate(parent=self.ui.tableProduct,
-                                                                          mapModel=self._domainModel.productMapModel))
+                                                                          mapModel=self._domainModel.dicts[const.DICT_PRODUCT]))
         self.ui.tableProduct.setItemDelegateForColumn(1, SpinBoxDelegate(parent=self.ui.tableProduct))
 
-        self.ui.comboClient.setModel(self._domainModel.clientMapModel)
+        self.ui.comboClient.setModel(self._domainModel.dicts[const.DICT_CLIENT])
         self.ui.tableProduct.setModel(self._productModel)
         self._productModel.initModel(self._productList)
 
@@ -55,6 +55,7 @@ class DlgContractData(QDialog):
         self.ui.btnClientAdd.clicked.connect(self.onBtnClientAddClicked)
         self.ui.btnProductAdd.clicked.connect(self.onBtnProductAddClicked)
         self.ui.btnProductRemove.clicked.connect(self.onBtnProductRemoveClicked)
+        self.ui.btnNewProduct.clicked.connect(self.onBtnNewProductClicked)
 
         # set widget data
         if self._currentItem is None:
@@ -68,10 +69,10 @@ class DlgContractData(QDialog):
             if isinstance(date, datetime.date):
                 return QDate().fromString(date.isoformat(), "yyyy-MM-dd")
             else:
-                return QDate.currentDate()
+                return QDate().fromString("2000-01-01", "yyyy-MM-dd")
 
         self.ui.editIndex.setText(self._currentItem.item_index)
-        self.ui.comboClient.setCurrentText(self._domainModel.clientMapModel.getData(self._currentItem.item_clientRef))
+        self.ui.comboClient.setCurrentText(self._domainModel.dicts[const.DICT_CLIENT].getData(self._currentItem.item_clientRef))
         self.ui.editProject.setText(self._currentItem.item_projCode)
         self.ui.editRequestN.setText(self._currentItem.item_requestN)
         self.ui.dateRequest.setDate(formatDate(self._currentItem.item_requestDate))
@@ -173,6 +174,12 @@ class DlgContractData(QDialog):
             QMessageBox.information(self, "Ошибка", "Добавьте товары в список.")
             return False
         else:
+            ids = self._productModel.getProductIdList()
+            if len(ids) > len(set(ids)):
+                QMessageBox.information(self, "Ошибка", "Товары в списке не должны повторяться.")
+                return False
+
+            # TODO: move to the model
             for i in range(self._productModel.rowCount()):
                 if self._productModel.data(self._productModel.index(i, 0, QModelIndex()), Qt.DisplayRole).value() == "Все":
                     QMessageBox.information(self, "Ошибка", "Выберите товар из списка.")
@@ -182,6 +189,10 @@ class DlgContractData(QDialog):
         return True
 
     def collectData(self):
+
+        # def getDate(strdate):
+        #     return str
+
         id_ = None
         if self._currentItem is not None:
             id_ = self._currentItem.item_id
@@ -197,44 +208,44 @@ class DlgContractData(QDialog):
                                     projCode=self.ui.editProject.text(),
                                     requestN=self.ui.editRequestN.text(),
                                     requestDate=datetime.datetime.strptime(
-                                        self.ui.dateRequest.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateRequest.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     dogozName=self.ui.dateDogoz.text(),
                                     dogozDate=datetime.datetime.strptime(
-                                        self.ui.dateDogoz.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateDogoz.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     deviceRequestN=self.ui.editDevRequestN.text(),
                                     deviceRequestCode=self.ui.editDevRequestCode.text(),
                                     contractN=self.ui.editContractN.text(),
                                     contractDate=datetime.datetime.strptime(
-                                        self.ui.dateContract.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateContract.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     specReturnDate=datetime.datetime.strptime(
-                                        self.ui.dateSpecReturn.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateSpecReturn.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     sum=int(self.ui.spinSum.value() * 100),
                                     billNumber=self.ui.editBillN.text(),
                                     billDate=datetime.datetime.strptime(self.ui.dateBill.date().toString("yyyy-MM-dd"),
-                                                                        "%Y-%m-%d"),
+                                                                        "%Y-%m-%d").date(),
                                     milDate=datetime.datetime.strptime(self.ui.dateMil.date().toString("yyyy-MM-dd"),
-                                                                       "%Y-%m-%d"),
+                                                                       "%Y-%m-%d").date(),
                                     addLetterDate=datetime.datetime.strptime(
-                                        self.ui.dateAddLetter.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateAddLetter.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     responseDate=datetime.datetime.strptime(
-                                        self.ui.dateResponse.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateResponse.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     paymentOrderN=self.ui.editPaymentN.text(),
                                     paymentDate=datetime.datetime.strptime(
-                                        self.ui.datePayment.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.datePayment.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     matPurchaseDate=datetime.datetime.strptime(
-                                        self.ui.dateMatPurchase.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateMatPurchase.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     planShipmentDate=datetime.datetime.strptime(
-                                        self.ui.datePlanShip.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.datePlanShip.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     shipmentPeriod=self.ui.spinShipPeriod.value(),
                                     invoiceN=self.ui.editInvoiceN.text(),
                                     invoiceDate=datetime.datetime.strptime(
-                                        self.ui.dateInvoice.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.dateInvoice.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     packingListN=self.ui.editPacklistN.text(),
                                     packingListDate=datetime.datetime.strptime(
-                                        self.ui.datePacklist.date().toString("yyyy-MM-dd"), "%Y-%m-%d"),
+                                        self.ui.datePacklist.date().toString("yyyy-MM-dd"), "%Y-%m-%d").date(),
                                     shipNote=self.ui.editShipNote.text(),
                                     shipDate=datetime.datetime.strptime(self.ui.dateShip.date().toString("yyyy-MM-dd"),
-                                                                        "%Y-%m-%d"),
+                                                                        "%Y-%m-%d").date(),
                                     completed=completed,
                                     contacts=self.ui.textContact.toPlainText(),
                                     manufPlanDate=datetime.datetime.strptime(
@@ -248,17 +259,19 @@ class DlgContractData(QDialog):
     def onBtnOkClicked(self):
         if not self.verifyInputData():
             return
-
         self.collectData()
         self.accept()
 
     def onBtnClientAddClicked(self):
-        print("add client")
+        self._uiFacade.requestClientAdd(caller=self)
 
     def onBtnProductAddClicked(self):
-        self._productModel.addProduct(self._domainModel.productMapModel.getIdByIndex(1))
+        self._productModel.addProduct(self._domainModel.dicts[const.DICT_PRODUCT].getIdByIndex(1))
 
     def onBtnProductRemoveClicked(self):
         if not self.ui.tableProduct.selectionModel().hasSelection():
             return
         self._productModel.removeProduct(self.ui.tableProduct.selectionModel().selectedIndexes()[0].row())
+
+    def onBtnNewProductClicked(self):
+        self._uiFacade.requestProductAdd(caller=self)

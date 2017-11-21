@@ -1,11 +1,11 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QAbstractItemView, QAction, QMessageBox, QTreeView
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex
+from PyQt5.QtCore import Qt
 
-# import const
-# from devicesearchproxymodel import DeviceSearchProxyModel
+import const
 from contractitem import ContractItem
 from contractmodel import ContractModel
+from contractsearchproxymodel import ContractSearchProxyModel
 from domainmodel import DomainModel
 from mysqlengine import MysqlEngine
 from persistencefacade import PersistenceFacade
@@ -47,8 +47,7 @@ class MainWindow(QMainWindow):
 
         # device tree + search proxy
         self._modelContractTree = ContractModel(parent=self, domainModel=self._modelDomain)
-        self._modelSearchProxy = QSortFilterProxyModel(parent=self)
-        # self._modelSearchProxy = DeviceSearchProxyModel(parent=self)
+        self._modelSearchProxy = ContractSearchProxyModel(parent=self)
         self._modelSearchProxy.setSourceModel(self._modelContractTree)
 
         # connect ui facade to models
@@ -86,8 +85,7 @@ class MainWindow(QMainWindow):
         self.ui.treeContract.header().setStretchLastSection(True)
 
         # setup filter widgets
-        # self.ui.comboVendorFilter.setModel(self._modelDomain.vendorMapModel)
-        # self.ui.comboDevtypeFilter.setModel(self._modelDomain.devtypeMapModel)
+        self.ui.comboClientFilter.setModel(self._modelDomain.dicts[const.DICT_CLIENT])
 
         # create actions
         self.initActions()
@@ -103,9 +101,8 @@ class MainWindow(QMainWindow):
         self.ui.treeContract.doubleClicked.connect(self.onTreeContractDoubleClicked)
 
         # search widgets
-        # self.ui.comboVendorFilter.currentIndexChanged.connect(self.setSearchFilter)
-        # self.ui.comboDevtypeFilter.currentIndexChanged.connect(self.setSearchFilter)
-        # self.ui.editSearch.textChanged.connect(self.setSearchFilter)
+        self.ui.comboClientFilter.currentIndexChanged.connect(self.setSearchFilter)
+        self.ui.editSearchFilter.textChanged.connect(self.setSearchFilter)
 
         # UI modifications
         # self.ui.btnDictEditor.setVisible(False)
@@ -137,9 +134,6 @@ class MainWindow(QMainWindow):
         # self.ui.treeDeviceList.setColumnWidth(5, tdwidth * 0.25)
         # self.ui.treeDeviceList.setColumnWidth(6, tdwidth * 0.15)
 
-    # def updateItemInfo(self, index):
-    #     self.ui.textDeviceInfo.setPlainText(self._uiFacade.requestItemInfo(index))
-
     # ui events
     def onBtnContractAddClicked(self):
         self.actContractAdd.trigger()
@@ -158,13 +152,12 @@ class MainWindow(QMainWindow):
         # if index.column() != 0:
         self.actContractEdit.trigger()
 
-    # def setSearchFilter(self, dummy=0):
-    #     self._modelSearchProxy.filterString = self.ui.editSearch.text()
-    #     self._modelSearchProxy.filterVendor = self.ui.comboVendorFilter.currentData(const.RoleNodeId)
-    #     self._modelSearchProxy.filterDevtype = self.ui.comboDevtypeFilter.currentData(const.RoleNodeId)
-    #
-    #     self._modelSearchProxy.invalidate()
-    #     # self.ui.treeDeviceList.setColumnHidden(5, True)
+    def setSearchFilter(self, dummy=0):
+        self._modelSearchProxy.filterString = self.ui.editSearchFilter.text()
+        self._modelSearchProxy.filterClient = self.ui.comboClientFilter.currentData(const.RoleNodeId)
+
+        self._modelSearchProxy.invalidate()
+        # self.ui.treeDeviceList.setColumnHidden(5, True)
 
     # misc events
     def resizeEvent(self, event):
