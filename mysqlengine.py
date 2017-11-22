@@ -44,7 +44,6 @@ class MysqlEngine(QObject):
     def initEngine(self):
         print("init mysql engine")
         ok, err = self.connectToDatabase()
-        print("init", ok, err)
 
     def execSimpleQuery(self, string):
         with self._connection:
@@ -164,12 +163,12 @@ class MysqlEngine(QObject):
     #     q = "CALL updateDeviceMapping(%s, %s)"
     #     for m in mappings:
     #         self.execParametrizedQuery(q, m)
-    #
+
     # def deleteDeviceRecord(self, item):
     #     print("mysql engine delete device:", item)
     #     q = "CALL deleteDevice(%s)"
     #     self.execParametrizedQuery(q, item[-1])
-    #
+
     # def insertVendorRecord(self, data: list):
     #     print("mysql engine insert vendor record", data)
     #     q = "CALL insertVendorRecord(%s, %s)"

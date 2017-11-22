@@ -1,6 +1,7 @@
 import const
 import datetime
-from PyQt5.QtCore import Qt, QModelIndex, QVariant, QDate, pyqtSlot, pyqtSignal, QAbstractItemModel
+from dateutil.rrule import *
+from PyQt5.QtCore import Qt, QModelIndex, QVariant, pyqtSlot, QAbstractItemModel
 from contractitem import ContractItem
 
 
@@ -45,7 +46,8 @@ class ContractModel(QAbstractItemModel):
     ColumnClient = ColumnShipYear + 1
     ColumnProjectCode = ColumnClient + 1
     ColumnProduct = ColumnProjectCode + 1           # synthetic
-    ColumnRequestNum = ColumnProduct + 1
+    ColumnProductDone = ColumnProduct + 1           # synthetic
+    ColumnRequestNum = ColumnProductDone + 1
     ColumnRequestDate = ColumnRequestNum + 1
     ColumnDogozName = ColumnRequestDate + 1
     ColumnDogozDate = ColumnDogozName + 1
@@ -84,11 +86,12 @@ class ContractModel(QAbstractItemModel):
     ColumnMiscData = ColumnPaymentDays + 1
     ColumnCount = ColumnMiscData + 1
 
-    _headers = ["id", "index", "shipyear", "client", "projcode", "prod", "reqnum", "reqdate", "dogozname", "dogozdate",
-                "devreqnum", "devreqcode", "connum", "condate", "specretdate", "sum", "billnum", "billdate", "mildate",
-                "addletterdate", "responsedate", "paynum", "paydate", "matpurchdate", "mindate", "maxdate", "plandate",
-                "manufdate", "shipperiod", "invoicenum", "invoicedate", "packlistnum", "packlistdate", "shipnote",
-                "shipdate", "complete", "contacts", "taskd", "specd", "mild", "cliemntd", "payd", "misc"]
+    _headers = ["id", "index", "shipyear", "client", "projcode", "prod", "prod done", "reqnum", "reqdate", "dogozname",
+                "dogozdate", "devreqnum", "devreqcode", "connum", "condate", "specretdate", "sum", "billnum",
+                "billdate", "mildate", "addletterdate", "responsedate", "paynum", "paydate", "matpurchdate", "mindate",
+                "maxdate", "plandate", "manufdate", "shipperiod", "invoicenum", "invoicedate", "packlistnum",
+                "packlistdate", "shipnote", "shipdate", "complete", "contacts", "taskd", "specd", "mild", "cliemntd",
+                "payd", "misc"]
 
 
 
@@ -192,6 +195,17 @@ class ContractModel(QAbstractItemModel):
             return "".join([model.dicts[const.DICT_PRODUCT].getData(r[1]) + " (" + str(r[2]) + " шт.)/" for r in
                             model.contractDetailList[item.item_id]]).strip("/")
 
+        def getColumnProductDone(model, item: ContractItem):
+            ret = str()
+            for r in model.contractDetailList[item.item_id]:
+                d = str()
+                if r[4] == 0:
+                    d = r[3].isoformat()
+                elif r[4] == 1:
+                    d = "Ожидание"
+                ret += (model.dicts[const.DICT_PRODUCT].getData(r[1]) + " (" + str(r[2]) + " шт.) (" + d + ")/")
+            return ret.strip("/")
+
         def getColumnPaymentDays(item: ContractItem):
             if not isinstance(item.item_paymentDate, datetime.date) \
                     or not isinstance(item.item_billDate, datetime.date):
@@ -244,6 +258,8 @@ class ContractModel(QAbstractItemModel):
                 return QVariant(item.item_projCode)
             elif col == self.ColumnProduct:
                 return QVariant(getColumnProduct(self._modelDomain, item))
+            elif col == self.ColumnProductDone:
+                return QVariant(getColumnProductDone(self._modelDomain, item))
             elif col == self.ColumnRequestNum:
                 return QVariant(item.item_requestN)
             elif col == self.ColumnRequestDate:
@@ -291,7 +307,17 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnPlanShipmentDate:
                 return QVariant(str(item.item_planShipmentDate))
             elif col == self.ColumnManufPlanDate:
-                return QVariant(str(item.item_manufPlanDate))
+                # TODO: if performance issues, use pandas:
+                # import pandas as pd
+                # # BDay is business day, not birthday...
+                # from pandas.tseries.offsets import BDay
+                #
+                # # pd.datetime is an alias for datetime.datetime
+                # today = pd.datetime.today()
+                # print
+                # today - BDay(4)
+                return QVariant(
+                    rrule(DAILY, byweekday=(MO, TU, WE, TH, FR), dtstart=item.item_requestDate)[100].date().isoformat())
             elif col == self.ColumnShipmentPeriod:
                 return QVariant(item.item_shipmentPeriod)
             elif col == self.ColumnInvoiceNum:

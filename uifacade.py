@@ -18,19 +18,6 @@ class UiFacade(QObject):
     def initFacade(self):
         print("init ui facade")
 
-    # process ui requests
-    # def requestRefresh(self):
-    #     self._domainModel.refreshData()
-    #     print("ui facade refresh request")
-    #
-    # def requestItemInfo(self, index: QModelIndex):
-    #     item: DeviceItem = self._domainModel.getItemById(index.data(const.RoleNodeId))
-    #     return "Наименование:\n" + item.item_name + \
-    #            "\n\nПроизводитель:\n" + self._domainModel.getVendorById(item.item_vendor)[0] + \
-    #            "\n\nТип устройства:\n" + self._domainModel.getDevtypeById(item.item_devtype) + \
-    #            "\n\nОписание:\n" + item.item_desc + \
-    #            "\n\nПараметры:\n" + item.item_spec
-
     def findDiffBetweenProductLists(self, old: list, new: list):
         added = list()
         changed = list()
