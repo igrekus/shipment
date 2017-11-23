@@ -199,9 +199,9 @@ class ContractModel(QAbstractItemModel):
             ret = str()
             for r in model.contractDetailList[item.item_id]:
                 d = str()
-                if r[4] == 0:
+                if r[4] == 1:
                     d = r[3].isoformat()
-                elif r[4] == 1:
+                elif r[4] == 0:
                     d = "Ожидание"
                 ret += (model.dicts[const.DICT_PRODUCT].getData(r[1]) + " (" + str(r[2]) + " шт.) (" + d + ")/")
             return ret.strip("/")

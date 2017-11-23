@@ -4,6 +4,7 @@ import datetime
 from copy import deepcopy
 from comboboxdelegate import ComboBoxDelegate
 from contractitem import ContractItem
+from dateeditdelegate import DateEditDelegate
 from productlistmodel import ProductListModel
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QMessageBox, QTableView
@@ -43,8 +44,10 @@ class DlgContractData(QDialog):
         # init widgets
         self.ui.tableProduct: QTableView
         self.ui.tableProduct.setItemDelegateForColumn(0, ComboBoxDelegate(parent=self.ui.tableProduct,
-                                                                          mapModel=self._domainModel.dicts[const.DICT_PRODUCT]))
+                                                                          mapModel=self._domainModel.dicts[
+                                                                              const.DICT_PRODUCT]))
         self.ui.tableProduct.setItemDelegateForColumn(1, SpinBoxDelegate(parent=self.ui.tableProduct))
+        self.ui.tableProduct.setItemDelegateForColumn(3, DateEditDelegate(parent=self.ui.tableProduct))
 
         self.ui.comboClient.setModel(self._domainModel.dicts[const.DICT_CLIENT])
         self.ui.tableProduct.setModel(self._productModel)
@@ -62,6 +65,9 @@ class DlgContractData(QDialog):
             self.resetWidgets()
         else:
             self.updateWidgets()
+
+        # adjust UI
+        self.ui.tableProduct.resizeColumnsToContents()
 
     def updateWidgets(self):
 
