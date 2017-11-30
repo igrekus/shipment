@@ -8,7 +8,7 @@ class DateEditDelegate(QStyledItemDelegate):
         super(DateEditDelegate, self).__init__(parent)
 
     def createEditor(self, parent, option, index):
-        if index.column() != 3:
+        if index.column() != 4:
             return super().createEditor(parent, option, index)
 
         de = QDateEdit(parent=parent)

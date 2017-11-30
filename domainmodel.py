@@ -32,8 +32,11 @@ class DomainModel(QObject):
         print("init domain model")
         self.contractList = self._persistenceFacade.getContractList()
         self.contractDetailList = self._persistenceFacade.getContractDetailList()
+
+        # FIXME: make uniform dict
         for name in self.dictList:
             self.buildMapModel(name)
+        self.dicts[const.DICT_PRICE] = self._persistenceFacade.getDict(const.DICT_PRICE)
 
     def getItemById(self, id_):
         return self.contractList[id_]

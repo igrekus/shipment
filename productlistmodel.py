@@ -9,11 +9,12 @@ from PyQt5.QtGui import QBrush, QColor
 class ProductListModel(QAbstractTableModel):
     ColumnName = 0
     ColumnAmount = ColumnName + 1
-    ColumnStatus = ColumnAmount + 1
+    ColumnPrice = ColumnAmount + 1
+    ColumnStatus = ColumnPrice + 1
     ColumnDoneDate = ColumnStatus + 1
     ColumnCount = ColumnDoneDate + 1
 
-    _header = ["Наименование", "Кол-во (шт.)", "Статус", "Завершено"]
+    _header = ["Наименование", "Кол-во (шт.)", "Цена", "Статус", "Завершено"]
 
     def __init__(self, parent=None, domainModel=None):
         super(ProductListModel, self).__init__(parent)
@@ -86,6 +87,8 @@ class ProductListModel(QAbstractTableModel):
                 return QVariant(self._modelDomain.dicts[const.DICT_PRODUCT].getData(self._productList[row][1]))
             elif col == self.ColumnAmount:
                 return QVariant(str(self._productList[row][2]) + " шт.")
+            elif col == self.ColumnPrice:
+                return QVariant(str(self._modelDomain.dicts[const.DICT_PRICE][self._productList[row][1]]) + " руб.")
             elif col == self.ColumnDoneDate:
                 if self._productList[row][4] == 1:
                     return QVariant(self._productList[row][3].isoformat())
@@ -117,14 +120,19 @@ class ProductListModel(QAbstractTableModel):
 
     def flags(self, index):
         f = super(ProductListModel, self).flags(index)
-        if index.column() == self.ColumnStatus:
+
+        col = index.column()
+
+        if col == self.ColumnName or col == self.ColumnAmount:
+            return f | Qt.ItemIsEditable
+        elif col == self.ColumnStatus:
             return f | Qt.ItemIsUserCheckable
-        if index.column() == self.ColumnDoneDate:
+        elif col == self.ColumnDoneDate:
             if self._productList[index.row()][4] == 1:
                 return f | Qt.ItemIsEditable
             else:
                 return f
-        return f | Qt.ItemIsEditable
+        return f
 
     def getProductList(self) -> list:
         if not self._productList:

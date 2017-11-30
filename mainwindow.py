@@ -14,6 +14,9 @@ from uifacade import UiFacade
 
 class MainWindow(QMainWindow):
 
+    # TODO: calculate completion by completed items
+    # TODO: product editor with prices
+
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 

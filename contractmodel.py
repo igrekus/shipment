@@ -105,6 +105,8 @@ class ContractModel(QAbstractItemModel):
         self._modelDomain.contractUpdated.connect(self.onContractUpdated)
         self._modelDomain.contractRemoved.connect(self.onContractRemoved)
 
+        self.cache = dict()
+
     def clear(self):
         def clearTreeNode(node):
             if node.childNodes:
@@ -191,6 +193,11 @@ class ContractModel(QAbstractItemModel):
 
     def data(self, index: QModelIndex, role=None) -> QVariant:
 
+        def getColumnShipYear(item: ContractItem):
+            if not isinstance(item.item_paymentDate, datetime.date):
+                return str("N/A")
+            return str((item.item_paymentDate + datetime.timedelta(days=89)).year)
+
         def getColumnProduct(model, item: ContractItem):
             return "".join([model.dicts[const.DICT_PRODUCT].getData(r[1]) + " (" + str(r[2]) + " шт.)/" for r in
                             model.contractDetailList[item.item_id]]).strip("/")
@@ -205,6 +212,35 @@ class ContractModel(QAbstractItemModel):
                     d = "Ожидание"
                 ret += (model.dicts[const.DICT_PRODUCT].getData(r[1]) + " (" + str(r[2]) + " шт.) (" + d + ")/")
             return ret.strip("/")
+
+        def getColumnSum(model, item: ContractItem):
+            s = sum([model.dicts[const.DICT_PRICE][prod[0]]*prod[1] for prod in               # get price for amount
+                     [(rec[1], rec[2]) for rec in model.contractDetailList[item.item_id]]])   # get list of (id, amount)
+            return "{:,.2f}".format(float(s / 100)).replace(",", " ") + " руб."
+            # return "{:,.2f}".format(float(item.item_sum / 100)).replace(",", " ") + " руб."
+
+        def getColumnMinShipDate(item: ContractItem):
+            if not isinstance(item.item_paymentDate, datetime.date):
+                return str("N/A")
+            return str(item.item_paymentDate + datetime.timedelta(days=89))
+
+        def getColumnMaxShipDate(item: ContractItem):
+            if not isinstance(item.item_paymentDate, datetime.date):
+                return str("N/A")
+            return str(item.item_paymentDate + datetime.timedelta(days=item.item_shipmentPeriod - 1))
+
+        def getColumnManufPlanDate(item: ContractItem):
+            # TODO: if performance issues, use pandas:
+            # import pandas as pd
+            # # BDay is business day, not birthday...
+            # from pandas.tseries.offsets import BDay
+            #
+            # # pd.datetime is an alias for datetime.datetime
+            # today = pd.datetime.today()
+            # print
+            # today - BDay(4)
+            return str(
+                rrule(DAILY, byweekday=(MO, TU, WE, TH, FR), dtstart=item.item_requestDate)[100].date().isoformat())
 
         def getColumnPaymentDays(item: ContractItem):
             if not isinstance(item.item_paymentDate, datetime.date) \
@@ -236,6 +272,10 @@ class ContractModel(QAbstractItemModel):
                 return str("N/A")
             return str((item.item_specReturnDate - item.item_requestDate).days)
 
+        def getColumnMiscData(item: ContractItem):
+            return str("Заявка " + item.item_requestN + " от " + str(item.item_requestDate) + " на " + getColumnProduct(
+                     self._modelDomain, item))
+
         if not index.isValid():
             return QVariant()
 
@@ -243,23 +283,37 @@ class ContractModel(QAbstractItemModel):
 
         item: ContractItem = self._modelDomain.getItemById(index.internalPointer().data)
 
+        if item.item_id not in self.cache:
+            l = (getColumnShipYear(item),
+                 getColumnProduct(self._modelDomain, item),
+                 getColumnProductDone(self._modelDomain, item),
+                 getColumnSum(self._modelDomain, item),
+                 getColumnMinShipDate(item),
+                 getColumnMaxShipDate(item),
+                 getColumnManufPlanDate(item),
+                 getColumnTaskDays(item),
+                 getColumnSpecDays(item),
+                 getColumnMilDays(item),
+                 getColumnClientDays(item),
+                 getColumnPaymentDays(item),
+                 getColumnMiscData(item))
+            self.cache[item.item_id] = l
+
         if role == Qt.DisplayRole or role == Qt.ToolTipRole:
             if col == self.ColumnId:
                 return QVariant(item.item_id)
             elif col == self.ColumnIndex:
                 return QVariant(item.item_index)
             elif col == self.ColumnShipYear:
-                if not isinstance(item.item_paymentDate, datetime.date):
-                    return QVariant("N/A")
-                return QVariant((item.item_paymentDate + datetime.timedelta(days=89)).year)
+                return QVariant(self.cache[item.item_id][0])
             elif col == self.ColumnClient:
                 return QVariant(self._modelDomain.dicts[const.DICT_CLIENT].getData(item.item_clientRef))
             elif col == self.ColumnProjectCode:
                 return QVariant(item.item_projCode)
             elif col == self.ColumnProduct:
-                return QVariant(getColumnProduct(self._modelDomain, item))
+                return QVariant(self.cache[item.item_id][1])
             elif col == self.ColumnProductDone:
-                return QVariant(getColumnProductDone(self._modelDomain, item))
+                return QVariant(self.cache[item.item_id][2])
             elif col == self.ColumnRequestNum:
                 return QVariant(item.item_requestN)
             elif col == self.ColumnRequestDate:
@@ -279,7 +333,7 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnSpecReturnDate:
                 return QVariant(str(item.item_specReturnDate))
             elif col == self.ColumnSum:
-                return QVariant(item.item_sum)   # TODO format suf output
+                return QVariant(self.cache[item.item_id][3])
             elif col == self.ColumnBillNum:
                 return QVariant(item.item_billNumber)
             elif col == self.ColumnBillDate:
@@ -297,27 +351,13 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnMatPurchaseDate:
                 return QVariant(str(item.item_matPurchaseDate))
             elif col == self.ColumnMinShipDate:
-                if not isinstance(item.item_paymentDate, datetime.date):
-                    return QVariant("N/A")
-                return QVariant(str(item.item_paymentDate + datetime.timedelta(days=89)))
+                return QVariant(self.cache[item.item_id][4])
             elif col == self.ColumnMaxShipDate:
-                if not isinstance(item.item_paymentDate, datetime.date):
-                    return QVariant("N/A")
-                return QVariant(str(item.item_paymentDate + datetime.timedelta(days=item.item_shipmentPeriod - 1)))
+                return QVariant(self.cache[item.item_id][5])
             elif col == self.ColumnPlanShipmentDate:
                 return QVariant(str(item.item_planShipmentDate))
             elif col == self.ColumnManufPlanDate:
-                # TODO: if performance issues, use pandas:
-                # import pandas as pd
-                # # BDay is business day, not birthday...
-                # from pandas.tseries.offsets import BDay
-                #
-                # # pd.datetime is an alias for datetime.datetime
-                # today = pd.datetime.today()
-                # print
-                # today - BDay(4)
-                return QVariant(
-                    rrule(DAILY, byweekday=(MO, TU, WE, TH, FR), dtstart=item.item_requestDate)[100].date().isoformat())
+                return QVariant(self.cache[item.item_id][6])
             elif col == self.ColumnShipmentPeriod:
                 return QVariant(item.item_shipmentPeriod)
             elif col == self.ColumnInvoiceNum:
@@ -337,26 +377,22 @@ class ContractModel(QAbstractItemModel):
             elif col == self.ColumnContacts:
                 return QVariant(item.item_contacts)
             elif col == self.ColumnTaskDays:
-                return QVariant(getColumnTaskDays(item))
+                return QVariant(self.cache[item.item_id][7])
             elif col == self.ColumnSpecDays:
-                return QVariant(getColumnSpecDays(item))
+                return QVariant(self.cache[item.item_id][8])
             elif col == self.ColumnMilDays:
-                return QVariant(getColumnMilDays(item))
+                return QVariant(self.cache[item.item_id][9])
             elif col == self.ColumnClientDays:
-                return QVariant(getColumnClientDays(item))
+                return QVariant(self.cache[item.item_id][10])
             elif col == self.ColumnPaymentDays:
-                return QVariant(getColumnPaymentDays(item))
+                return QVariant(self.cache[item.item_id][11])
             elif col == self.ColumnMiscData:
-                return QVariant("Заявка " + item.item_requestN +
-                                " от " + str(item.item_requestDate) +
-                                " на " + getColumnProduct(self._modelDomain, item))
+                return QVariant(self.cache[item.item_id][12])
 
         elif role == Qt.CheckStateRole:
+            # TODO: calc completion by all completed items, exclude empty contracts
             if col == self.ColumnCompleted:
-                if item.item_completed == 0:
-                    return QVariant(0)
-                elif item.item_completed == 1:
-                    return QVariant(2)
+                return QVariant(item.item_completed * 2)
 
         # elif role == Qt.BackgroundRole:
         #     retcolor = Qt.white;
@@ -406,17 +442,19 @@ class ContractModel(QAbstractItemModel):
     @pyqtSlot(int)
     def onContractAdded(self, conId: int):
         # TODO: if performance issues -- don't rebuild the whole tree, just add inserted item
-        print("contract added slot:", conId)
+        print("contract added:", conId)
         self.addRow(conId)
         # self.initModel()
 
     @pyqtSlot(int)
     def onContractUpdated(self, conId: int):
-        print("device updated slot:", conId)
+        print("contract updated:", conId)
+        del self.cache[conId]
 
     @pyqtSlot(int)
     def onContractRemoved(self, conId: int):
-        print("device removed slot:", conId, "row:")
+        print("contract removed:", conId, "row:")
+        del self.cache[conId]
         row = self.rootNode.findChild(conId)
         self.beginRemoveRows(QModelIndex(), row, row)
         self.rootNode.childNodes.pop(row)
