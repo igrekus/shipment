@@ -88,7 +88,10 @@ class ProductListModel(QAbstractTableModel):
             elif col == self.ColumnAmount:
                 return QVariant(str(self._productList[row][2]) + " шт.")
             elif col == self.ColumnPrice:
-                return QVariant(str(self._modelDomain.dicts[const.DICT_PRICE][self._productList[row][1]]) + " руб.")
+                return QVariant("{:,.2f}"
+                                .format(
+                                float(self._modelDomain.dicts[const.DICT_PRICE][self._productList[row][1]] / 100))
+                                .replace(",", " ") + " руб.")
             elif col == self.ColumnDoneDate:
                 if self._productList[row][4] == 1:
                     return QVariant(self._productList[row][3].isoformat())

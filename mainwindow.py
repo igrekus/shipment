@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
         self.actContractAdd = QAction("Добавить поставку", self)
         self.actContractEdit = QAction("Изменить поставку", self)
         self.actContractDelete = QAction("Удалить поставку", self)
+        self.actCatalogOpen = QAction("Открыть каталог приборов", self)
 
     def initApp(self):
         # init instances
@@ -98,6 +99,7 @@ class MainWindow(QMainWindow):
         self.ui.btnContractAdd.clicked.connect(self.onBtnContractAddClicked)
         self.ui.btnContractEdit.clicked.connect(self.onBtnContractEditClicked)
         self.ui.btnContractDelete.clicked.connect(self.onBtnContractDeleteClicked)
+        self.ui.btnCatalogOpen.clicked.connect(self.onBtnCatalogOpenClicked)
 
         # tree and selection
         # self.ui.treeDeviceList.selectionModel().currentChanged.connect(self.onCurrentTreeItemChanged)
@@ -125,6 +127,9 @@ class MainWindow(QMainWindow):
         self.actContractDelete.setStatusTip("Удалить поставку")
         self.actContractDelete.triggered.connect(self.procActContractDelete)
 
+        self.actCatalogOpen.setStatusTip("Открыть каталог приборов")
+        self.actCatalogOpen.triggered.connect(self.procActCatalogOpen)
+
     def refreshView(self):
         windowRect = self.geometry()
         # tdwidth = windowRect.width() - 50
@@ -146,6 +151,9 @@ class MainWindow(QMainWindow):
 
     def onBtnContractDeleteClicked(self):
         self.actContractDelete.trigger()
+
+    def onBtnCatalogOpenClicked(self):
+        self.actCatalogOpen.trigger()
 
     # def onCurrentTreeItemChanged(self, cur: QModelIndex, prev: QModelIndex):
     #     sourceIndex = self._modelSearchProxy.mapToSource(cur)
@@ -196,3 +204,5 @@ class MainWindow(QMainWindow):
         selectedIndex = self.ui.treeContract.selectionModel().selectedIndexes()[0]
         self._uiFacade.requestContractDelete(self._modelSearchProxy.mapToSource(selectedIndex))
 
+    def procActCatalogOpen(self):
+        self._uiFacade.requestCatalogOpen()

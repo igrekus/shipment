@@ -3,6 +3,7 @@ from PyQt5.QtCore import QObject, QModelIndex
 from PyQt5.QtWidgets import QDialog, QMessageBox, QInputDialog, QLineEdit
 from contractitem import ContractItem
 from dlgcontractdata import DlgContractData
+from dlgproductcatalog import DlgProductCatalog
 
 
 class UiFacade(QObject):
@@ -98,6 +99,13 @@ class UiFacade(QObject):
             return
 
         self._domainModel.addDictRecord(const.DICT_PRODUCT, data)
+
+    def requestCatalogOpen(self):
+        print("ui facade open catalog request")
+
+        dialog = DlgProductCatalog(domainModel=self._domainModel, uiFacade=self)
+
+        dialog.exec()
 
     # def requestExit(self, index):
     #     # TODO make settings class if needed, only current week is saved for now
