@@ -75,3 +75,8 @@ class PersistenceFacade(QObject):
     # def deleteDictRecord(self, dictName, data):
     #     print("persistence facade add dict record:", dictName, data)
     #     self._engine.deleteDictRecord(dictName, (data, ))
+
+    def addProductRecord(self, name: str, price: int):
+        print("persistence facade add product record: ", name, price)
+        return self._engine.insertProductRecrod((name, price, ))
+

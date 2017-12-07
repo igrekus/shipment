@@ -10,6 +10,10 @@ class DomainModel(QObject):
     contractUpdated = pyqtSignal(int)
     contractRemoved = pyqtSignal(int)
 
+    productAdded = pyqtSignal(int)
+    productUpdated = pyqtSignal(int)
+    productRemoved = pyqtSignal(int)
+
     def __init__(self, parent=None, persistenceFacade=None):
         super(DomainModel, self).__init__(parent)
 
@@ -19,10 +23,7 @@ class DomainModel(QObject):
         self.contractDetailList = dict()
         self.dicts = dict()
 
-        self.clientMapModel: MapModel = None
-        self.productMapModel: MapModel = None
-
-        self.dictList = [const.DICT_CLIENT, const.DICT_PRODUCT]
+        self.dictNameList = [const.DICT_CLIENT, const.DICT_PRODUCT]
 
     def buildMapModel(self, name: str):
         self.dicts[name] = MapModel(self, self._persistenceFacade.getDict(name))
@@ -34,7 +35,7 @@ class DomainModel(QObject):
         self.contractDetailList = self._persistenceFacade.getContractDetailList()
 
         # FIXME: make uniform dict
-        for name in self.dictList:
+        for name in self.dictNameList:
             self.buildMapModel(name)
         self.dicts[const.DICT_PRICE] = self._persistenceFacade.getDict(const.DICT_PRICE)
 
@@ -79,6 +80,16 @@ class DomainModel(QObject):
         print("domain model add dict record:", name, data)
         newId = self._persistenceFacade.addDictRecord(name, data)
         self.dicts[name].addItem(newId, data)
+
+    def addProduct(self, name: str, price: int):
+        print("domain model add product record: ", name, price)
+        newId = self._persistenceFacade.addProductRecord(name, price)
+        print("new id:", newId)
+
+        self.dicts[const.DICT_PRODUCT].addItem(newId, name)
+        self.dicts[const.DICT_PRICE][newId] = price
+
+        self.productAdded.emit(newId)
 
     # def editDictRecord(self, dictName, data):
     #     print("domain model edit dict record:", dictName, data)

@@ -1,8 +1,9 @@
 from doublespinboxdelegate import DoubleSpinBoxDelegate
+from inputdialog import InputDialog
 from productcatalogmodel import ProductCatalogModel
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QTableView, QMessageBox
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
+from PyQt5.QtWidgets import QDialog, QTableView, QMessageBox, QLineEdit, QDoubleSpinBox
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex, QItemSelectionModel
 
 
 class DlgProductCatalog(QDialog):
@@ -37,17 +38,30 @@ class DlgProductCatalog(QDialog):
         # setup model
         self._searchProxyModel.setSourceModel(self._productModel)
         self.ui.tableProduct.setModel(self._searchProxyModel)
-        # self._productModel.initModel()
 
         # setup signals
         self.ui.btnAddProduct.clicked.connect(self.onBtnAddProduct)
+        self.ui.btnEditProduct.clicked.connect(self.onBtnEditProduct)
         self.ui.btnDeleteProduct.clicked.connect(self.onBtnDeleteProduct)
 
         # adjust UI
         self.ui.tableProduct.resizeColumnsToContents()
 
     def onBtnAddProduct(self):
-        self._productModel.addProduct()
+        dialog = InputDialog(parent=self, title="Введите информацию о приборе",
+                             widgetList=[QLineEdit, QDoubleSpinBox],
+                             widgetTitleList=["Название: ", "Цена, руб.: "],
+                             widgetDataList=["Новый прибор", 0.0])
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        data = dialog.getData()
+        self._domainModel.addProduct(data[0], int(data[1]*100))
+
+        self.ui.tableProduct.scrollToBottom()
+
+    def onBtnEditProduct(self):
+        print("edit product")
 
     def onBtnDeleteProduct(self):
         if not self.ui.tableProduct.selectionModel().hasSelection():

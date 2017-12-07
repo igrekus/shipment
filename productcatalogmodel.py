@@ -1,9 +1,9 @@
-import datetime
+from copy import deepcopy
+
 import const
 from domainmodel import DomainModel
 from collections import defaultdict
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, QDate, pyqtSlot
-from PyQt5.QtGui import QBrush, QColor
+from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, pyqtSlot
 
 
 class ProductCatalogModel(QAbstractTableModel):
@@ -21,6 +21,9 @@ class ProductCatalogModel(QAbstractTableModel):
 
         self.initModel()
 
+        # connect signals
+        self._modelDomain.productAdded.connect(self.productAdded)
+
     def clear(self):
         self.beginResetModel()
         self._productList.clear()
@@ -28,11 +31,7 @@ class ProductCatalogModel(QAbstractTableModel):
 
     def initModel(self):
         print("init product list model")
-        # for k, v in self._modelDomain.dicts[const.DICT_PRODUCT].mapData.items():
-        #     if k != 0:
-        #         print(k, v, self._modelDomain.dicts[const.DICT_PRICE][k])
-
-        self._productList = [[k, v, self._modelDomain.dicts[const.DICT_PRICE][k], const.ACTION_NO_ACTION] for k, v in
+        self._productList = [[k, v, self._modelDomain.dicts[const.DICT_PRICE][k]] for k, v in
                              self._modelDomain.dicts[const.DICT_PRODUCT].mapData.items() if k != 0]
 
     def headerData(self, section, orientation, role=None):
@@ -57,14 +56,12 @@ class ProductCatalogModel(QAbstractTableModel):
                 if self._productList[row][1] == value:
                     return False
                 self._productList[row][1] = value
-                self._productList[row][3] = const.ACTION_MODIFY
                 return True
 
             elif col == self.ColumnPrice:
                 if self._productList[row][2] == int(value*100):
                     return False
                 self._productList[row][2] = int(value*100)
-                self._productList[row][3] = const.ACTION_MODIFY
                 return True
 
         return False
@@ -98,12 +95,12 @@ class ProductCatalogModel(QAbstractTableModel):
 
         return QVariant()
 
-    def flags(self, index):
-        f = super(ProductCatalogModel, self).flags(index)
-        col = index.column()
-        if col == self.ColumnName or col == self.ColumnPrice:
-            return f | Qt.ItemIsEditable
-        return f
+    # def flags(self, index):
+    #     f = super(ProductCatalogModel, self).flags(index)
+    #     col = index.column()
+    #     if col == self.ColumnName or col == self.ColumnPrice:
+    #         return f | Qt.ItemIsEditable
+    #     return f
 
     def getProductList(self) -> list:
         if not self._productList:
@@ -111,23 +108,27 @@ class ProductCatalogModel(QAbstractTableModel):
 
         return self._productList
 
-    def getProductIdList(self) -> list:
-        return [p[1] for p in self._productList]
+    # def getProductIdList(self) -> list:
+    #     return [p[1] for p in self._productList]
 
-    def addProduct(self):
+    def addProduct(self, data: list):
         self.beginInsertRows(QModelIndex(), len(self._productList), len(self._productList))
-        self._productList.append([0, "Новый прибор", 0.0, const.ACTION_ADD])
+        self._productList.append([0, "Новый прибор", 0.0])
         self.endInsertRows()
+        return self.index(len(self._productList) - 1, 0, QModelIndex())
 
     def removeProduct(self, row: int):
         self.beginRemoveRows(QModelIndex(), row, row)
-        self._productList[row][3] = const.ACTION_DELETE
+        # self._productList[row][3] = const.ACTION_DELETE
         self.endRemoveRows()
 
-    # @pyqtSlot(int, int)
-    # def planItemsBeginInsert(self, first: int, last: int):
-    #     self.beginInsertRows(QModelIndex(), first, last)
-    #
+    @pyqtSlot(int)
+    def productAdded(self, id_: int):
+        self.beginResetModel()
+        self.clear()
+        self.initModel()
+        self.endResetModel()
+
     # @pyqtSlot()
     # def planItemsEndInsert(self):
     #     self.endInsertRows()

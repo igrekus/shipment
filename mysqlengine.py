@@ -147,38 +147,7 @@ class MysqlEngine(QObject):
         print(q, data)
         # self.execParametrizedQuery(q, (rec_id, mapping, ))
 
-    # def fetchVendorList(self):
-    #     return self.execSimpleQuery("CAll getVendorList()").fetchall()
-    #
-    # def fetchDevtypeList(self):
-    #     return self.execSimpleQuery("CALL getDevtypeList()").fetchall()
-
-    # def appendDeviceMapping(self, mappings):
-    #     q = "CALL appendDeviceMapping(%s, %s)"
-    #     for m in mappings:
-    #         self.execParametrizedQuery(q, m)
-
-    # def updateDeviceMappings(self, mappings):
-    #     print("mysql engine update device mappings:", mappings)
-    #     q = "CALL updateDeviceMapping(%s, %s)"
-    #     for m in mappings:
-    #         self.execParametrizedQuery(q, m)
-
-    # def deleteDeviceRecord(self, item):
-    #     print("mysql engine delete device:", item)
-    #     q = "CALL deleteDevice(%s)"
-    #     self.execParametrizedQuery(q, item[-1])
-
-    # def insertVendorRecord(self, data: list):
-    #     print("mysql engine insert vendor record", data)
-    #     q = "CALL insertVendorRecord(%s, %s)"
-    #     # print(q, data)
-    #     cursor = self.execParametrizedQuery(q, data)
-    #     rec_id = cursor.fetchone()[0]
-    #     return rec_id
-
-    # def checkDictRef(self, dictName, data):
-    #     print("mysql engine check dict reference:", dictName, data)
-    #     q = "CALL check" + dictName + "Ref(%s)"
-    #     cur = self.execParametrizedQuery(q, (data, ))
-    #     return bool(cur.fetchone()[0])
+    def insertProductRecrod(self, data: tuple):
+        q = "CALL insertProductRecord(%s, %s)"
+        print(q, data)
+        return 100
