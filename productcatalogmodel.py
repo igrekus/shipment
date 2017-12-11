@@ -1,8 +1,5 @@
-from copy import deepcopy
-
 import const
 from domainmodel import DomainModel
-from collections import defaultdict
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex, QVariant, pyqtSlot
 
 
@@ -23,6 +20,8 @@ class ProductCatalogModel(QAbstractTableModel):
 
         # connect signals
         self._modelDomain.productAdded.connect(self.productAdded)
+        self._modelDomain.productRemoved.connect(self.productRemoved)
+        self._modelDomain.productUpdated.connect(self.productUpdated)
 
     def clear(self):
         self.beginResetModel()
@@ -87,9 +86,9 @@ class ProductCatalogModel(QAbstractTableModel):
             elif col == self.ColumnPrice:
                 return QVariant(float(item[2] / 100))
 
-        # elif role == const.RoleNodeId:
-        #     return QVariant(self._productList[row][0])
-        #
+        elif role == const.RoleNodeId:
+            return item[0]
+
         # elif role == const.RoleProduct:
         #     return QVariant(self._productList[row][1])
 
@@ -108,22 +107,37 @@ class ProductCatalogModel(QAbstractTableModel):
 
         return self._productList
 
-    # def getProductIdList(self) -> list:
-    #     return [p[1] for p in self._productList]
-
     def addProduct(self, data: list):
         self.beginInsertRows(QModelIndex(), len(self._productList), len(self._productList))
         self._productList.append([0, "Новый прибор", 0.0])
         self.endInsertRows()
         return self.index(len(self._productList) - 1, 0, QModelIndex())
 
+    def updateProduct(self, row: int, name: str, price: int):
+        self._productList[row][1] = name
+        self._productList[row][2] = price
+        self.dataChanged.emit(self.index(row, 0, QModelIndex()), self.index(row, 2, QModelIndex()), [])
+
     def removeProduct(self, row: int):
         self.beginRemoveRows(QModelIndex(), row, row)
-        # self._productList[row][3] = const.ACTION_DELETE
+        del self._productList[row]
         self.endRemoveRows()
 
     @pyqtSlot(int)
     def productAdded(self, id_: int):
+        # TODO: make proper insertion
+        self.beginResetModel()
+        self.clear()
+        self.initModel()
+        self.endResetModel()
+
+    @pyqtSlot(int)
+    def productUpdated(self, id_: int):
+        pass
+
+    @pyqtSlot(int)
+    def productRemoved(self, id_: int):
+        # TODO: make proper deletion
         self.beginResetModel()
         self.clear()
         self.initModel()

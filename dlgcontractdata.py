@@ -188,10 +188,11 @@ class DlgContractData(QDialog):
             # TODO: move to the model
             for i in range(self._productModel.rowCount()):
                 if self._productModel.data(self._productModel.index(i, 0, QModelIndex()), Qt.DisplayRole).value() == "Все":
+                    # TODO: fix crash on message dismissal
                     QMessageBox.information(self, "Ошибка", "Выберите товар из списка.")
                     return False
 
-            # TODO reject dupes in product list
+            # TODO: reject dupes in product list
         return True
 
     def collectData(self):
@@ -277,6 +278,13 @@ class DlgContractData(QDialog):
     def onBtnProductRemoveClicked(self):
         if not self.ui.tableProduct.selectionModel().hasSelection():
             return
+
+        result = QMessageBox.question(self.parent(), "Внимание!",
+                                      "Вы хотите удалить выбранную запись?")
+
+        if result != QMessageBox.Yes:
+            return
+
         self._productModel.removeProduct(self.ui.tableProduct.selectionModel().selectedIndexes()[0].row())
 
     def onBtnNewProductClicked(self):

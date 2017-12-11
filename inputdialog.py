@@ -36,6 +36,9 @@ class InputDialog(QDialog):
                 self.formLayout.addRow(t, self.widgetInstanceList[-1][0])
             elif "QDoubleSpinBox" in str(w):
                 wi = w(parent=self)
+                wi.setMaximum(999999999.0)
+                wi.setMinimum(0.0)
+                wi.setDecimals(2)
                 self.widgetInstanceList.append([wi, wi.value, wi.setValue])
                 self.formLayout.addRow(t, self.widgetInstanceList[-1][0])
             else:

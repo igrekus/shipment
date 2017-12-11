@@ -151,3 +151,11 @@ class MysqlEngine(QObject):
         q = "CALL insertProductRecord(%s, %s)"
         print(q, data)
         return 100
+
+    def updateProductRecord(self, data: tuple):
+        q = "CALL updateProductRecord(%s, %s, %s)"
+        print(q, data)
+
+    def deleteProductRecord(self, data: tuple):
+        q = "CALL deleteProductRecord(%s)"
+        print(q, data)

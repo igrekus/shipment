@@ -76,10 +76,14 @@ class DomainModel(QObject):
 
         self.contractRemoved.emit(item.item_id)
 
+    # dictionary methods
+
     def addDictRecord(self, name, data):
         print("domain model add dict record:", name, data)
         newId = self._persistenceFacade.addDictRecord(name, data)
         self.dicts[name].addItem(newId, data)
+
+    # domain-specific methods
 
     def addProduct(self, name: str, price: int):
         print("domain model add product record: ", name, price)
@@ -91,24 +95,20 @@ class DomainModel(QObject):
 
         self.productAdded.emit(newId)
 
-    # def editDictRecord(self, dictName, data):
-    #     print("domain model edit dict record:", dictName, data)
-    #     self._persistenceFacade.editDictRecord(dictName, data)
-    #
-    #     if dictName == "vendor":
-    #         self.vendorMapModel.updateItem(data[0], data[1])
-    #     elif dictName == "devtype":
-    #         self.devtypeMapModel.updateItem(data[0], data[1])
+    def updateProduct(self, id_, name: str, price: int):
+        print("domain model update product record: ", id_, name, price)
+        self._persistenceFacade.updateProductRecord(id_, name, price)
 
-    # def deleteDictRecord(self, dictName, data):
-    #     print("domain model delete dict record:", dictName, data)
-    #     if not self._persistenceFacade.checkDictRef(dictName, data):
-    #
-    #         self._persistenceFacade.deleteDictRecord(dictName, data)
-    #
-    #         if dictName == "vendor":
-    #             self.vendorMapModel.removeItem(data)
-    #         elif dictName == "devtype":
-    #             self.vendorMapModel.removeItem(data)
-    #         return True
-    #     return False
+        self.dicts[const.DICT_PRODUCT].updateItem(id_, name)
+        self.dicts[const.DICT_PRICE][id_] = price
+
+        self.productUpdated.emit(id_)
+
+    def removeProduct(self, id_: int):
+        print("domain model remove product record: ", id_)
+        # TODO: make product usage check, ask if delete product from all of the contracts, redraw the main table
+
+        self._persistenceFacade.removeProductRecord(id_)
+
+        self.dicts[const.DICT_PRODUCT].removeItem(id_)
+        self.dicts[const.DICT_PRICE].pop(id_)

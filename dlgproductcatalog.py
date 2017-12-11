@@ -1,3 +1,4 @@
+import const
 from doublespinboxdelegate import DoubleSpinBoxDelegate
 from inputdialog import InputDialog
 from productcatalogmodel import ProductCatalogModel
@@ -56,17 +57,51 @@ class DlgProductCatalog(QDialog):
             return
 
         data = dialog.getData()
+
+        if not data[0]:   # if empty device name, don't do anything
+            return
+
         self._domainModel.addProduct(data[0], int(data[1]*100))
 
         self.ui.tableProduct.scrollToBottom()
 
     def onBtnEditProduct(self):
-        print("edit product")
+        if not self.ui.tableProduct.selectionModel().hasSelection():
+            QMessageBox.information(self, "Ошибка!", "Выберите запись о приборе для редактирования.")
+            return False
+
+        id_ = self.ui.tableProduct.selectionModel().selectedIndexes()[0].data(const.RoleNodeId)
+        oldName = self.ui.tableProduct.selectionModel().selectedIndexes()[0].data(Qt.EditRole)
+        oldPrice = self.ui.tableProduct.selectionModel().selectedIndexes()[1].data(Qt.EditRole)
+
+        dialog = InputDialog(parent=self, title="Введите информацию о приборе",
+                             widgetList=[QLineEdit, QDoubleSpinBox],
+                             widgetTitleList=["Название: ", "Цена, руб.: "],
+                             widgetDataList=[oldName, oldPrice])
+        if dialog.exec() != QDialog.Accepted:
+            return
+
+        data = dialog.getData()
+
+        self._domainModel.updateProduct(id_, data[0], int(data[1] * 100))
+
+        self._productModel.updateProduct(self.ui.tableProduct.selectionModel().selectedIndexes()[0].row(),
+                                         data[0], int(data[1] * 100))
 
     def onBtnDeleteProduct(self):
         if not self.ui.tableProduct.selectionModel().hasSelection():
             QMessageBox.information(self, "Ошибка!", "Выберите запись о приборе для удаления.")
             return False
+
+        result = QMessageBox.question(self.parent(), "Внимание!",
+                                      "Вы хотите удалить выбранную запись?")
+
+        if result != QMessageBox.Yes:
+            return
+
+        # TODO: check if a product in use, delete from all contracts
+
+        self._domainModel.removeProduct(self.ui.tableProduct.selectionModel().selectedIndexes()[0].data(const.RoleNodeId))
 
         row = self.ui.tableProduct.selectionModel().selectedIndexes()[0].row()
         self._productModel.removeProduct(row)
